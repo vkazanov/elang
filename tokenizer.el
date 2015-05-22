@@ -3,23 +3,34 @@
 ;; In short, this is a straightforward port of CPython's Lib/tokenize.py. See
 ;; the original code for comments.
 
-;;; Token regexes and regex-related helper functions
-;;; ------------------------------------------------
-
 (require 'token)
 
 (eval-when-compile (require 'names))
 
 (define-namespace tokenizer-
 
+;;; Tokenizer entry point
+;;; ---------------------
+
+(defun tokenize-region (beg end)
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list (point-min) (point-max))))
+  (unless (and beg end)
+    (error "Empty string"))
+  (let ((text (buffer-substring-no-properties beg end))
+        tokens)
+    (cl-flet ((yield (elem) (push elem tokens)))
+      (with-temp-buffer
+        (insert text)
+        (goto-char beg)
+        (generate-tokens #'yield)))))
+
+;;; Token regexes and regex-related helper functions
+;;; ------------------------------------------------
+
 ;; Regex helper functions
 ;; TODO: should probably use RX? It should have something similar
-(defun flatten (list-to-flatten)
-  (cond
-   ((null list-to-flatten) nil)
-   ((atom list-to-flatten) (list list-to-flatten))
-   (t
-    (append (flatten (car list-to-flatten)) (flatten (cdr list-to-flatten))))))
 (defun group (&rest choices)
   (concat "\\(" (mapconcat 'identity (flatten choices) "\\|") "\\)"))
 (defun any (&rest choices)
@@ -135,14 +146,6 @@ string beginning only. Return the match or nil."
 
 (defconst tabsize 8)
 
-(defun yield-to-buf (elem)
-  (with-current-buffer "tokenize-my.tokens"
-    (insert (prin1-to-string elem))
-    (insert "\n")))
-
-(defun yield (elem)
-  (print elem))
-
 ;; Main starting point
 (defun generate-tokens (yield)
   "Calls YIELD with every token found in the current buffer.
@@ -186,7 +189,7 @@ token is list of the following form:
                (matched
                 (setq pos (match-end 0)
                       end pos)
-                (funcall yield (list token-STRING
+                (funcall yield (list 'STRING
                                      (concat contstr (substring line 0 end))
                                      strstart (cons lnum end) (concat contline line)))
                 (setq contstr nil
@@ -197,7 +200,7 @@ token is list of the following form:
                                  "\\\n") )
                      (not (equal (substring line (- (length line) 3))
                                  "\\\r\n") ))
-                (funcall yield (list token-ERRORTOKEN
+                (funcall yield (list 'ERRORTOKEN
                                      (concat contstr line)
                                      strstart (cons lnum (length line))
                                      contline))
@@ -243,23 +246,23 @@ token is list of the following form:
                   (let* ((comment-token (replace-regexp-in-string "\r?\n$" "" (substring line pos)))
                          (nl-pos (+ pos (length comment-token))))
                     (funcall yield
-                             (list token-COMMENT comment-token
+                             (list 'COMMENT comment-token
                                    (cons lnum pos) (cons lnum (length comment-token)) line))
                     (funcall yield
-                             (list token-NL (substring line nl-pos)
+                             (list 'NL (substring line nl-pos)
                                    (cons lnum nl-pos) (cons lnum (length line)) line))))
                  (t (funcall yield
                              (if (equal (elt line pos) ?#)
-                                 (list token-COMMENT (substring line pos)
+                                 (list 'COMMENT (substring line pos)
                                        (cons lnum pos) (cons lnum (length line)) line)
-                               (list token-NL (substring line pos)
+                               (list 'NL (substring line pos)
                                      (cons lnum pos) (cons lnum (length line)) line)))))
                 (throw 'continue nil))
 
               ;; count indents or dedents
               (when (> column (car (last indents)))
                 (setq indents (append indents (list column)))
-                (funcall yield (list token-INDENT (substring line 0 pos)
+                (funcall yield (list 'INDENT (substring line 0 pos)
                                      (cons lnum 0) (cons lnum pos) line)))
               (while (< column (car (last indents)))
                 (unless (member column indents)
@@ -268,7 +271,7 @@ token is list of the following form:
                                (list "<tokenize>" lnum pos line))))
                 (setq indents (butlast indents))
                 (funcall yield
-                         (list token-DEDENT "" (cons lnum pos) (cons lnum pos) line)))))
+                         (list 'DEDENT "" (cons lnum pos) (cons lnum pos) line)))))
            (t
             (unless line
               (throw 'token-error
@@ -299,15 +302,15 @@ token is list of the following form:
                        ;; ordinary number
                        ((or (member initial numchars)
                             (and (equal initial ?.) (not (equal token "."))))
-                        (funcall yield (list token-NUMBER
+                        (funcall yield (list 'NUMBER
                                              token spos epos line)))
                        ;; newline
                        ((member initial '(?\r ?\n))
-                        (funcall yield (list (if (> parenlev 0 ) token-NL token-NEWLINE)
+                        (funcall yield (list (if (> parenlev 0 ) 'NL 'NEWLINE)
                                              token spos epos line)))
                        ;; comment
                        ((equal initial ?#)
-                        (funcall yield (list token-COMMENT
+                        (funcall yield (list 'COMMENT
                                              token spos epos line)))
 
                        ;; triple quoted
@@ -319,7 +322,7 @@ token is list of the following form:
                            (matched
                             (setq pos (match-end 0)
                                   token (substring line start pos))
-                            (funcall yield (list token-STRING
+                            (funcall yield (list 'STRING
                                                  token spos (cons lnum pos) line)))
                            ;; multiple line
                            (t
@@ -347,11 +350,11 @@ token is list of the following form:
                           (setq do-loop-inner nil)
                           (throw 'break nil))
                          (t
-                          (funcall yield (list token-STRING token spos epos line)))))
+                          (funcall yield (list 'STRING token spos epos line)))))
 
                        ;; ordinary name
                        ((member initial namechars)
-                        (funcall yield (list token-NAME
+                        (funcall yield (list 'NAME
                                              token spos epos line)))
 
                        ;; continued stmt
@@ -365,26 +368,29 @@ token is list of the following form:
                           (setq parenlev (1+ parenlev)))
                          ((member initial '(?\) ?\] ?\}))
                           (setq parenlev (1- parenlev))))
-                        (funcall yield (list token-OP
+                        (funcall yield (list 'OP
                                              token spos epos line))))))
                    (t
-                    (funcall yield (list token-ERRORTOKEN
+                    (funcall yield (list 'ERRORTOKEN
                                          (elt line pos)
                                          (cons lnum pos)
                                          (cons lnum (1+ pos))
                                          line))
                     (setq pos (1+ pos)))))))))))
     (dolist (indent (cdr indents))
-      (funcall yield (list token-DEDENT
+      (funcall yield (list 'DEDENT
                            ""
                            (cons lnum 0)
                            (cons lnum 0)
                            "")))
-    (funcall yield (list token-ENDMARKER
+    (funcall yield (list 'ENDMARKER
                          ""
                          (cons lnum 0)
                          (cons lnum 0)
                          ""))))
+
+;;; Utils
+;;; -----
 
 (defun readline ()
   "Read one more line in the current buffer, return as a plain
@@ -396,6 +402,21 @@ string with no properties, nil if EOF is reached"
       (setq line (concat (buffer-substring-no-properties p1 p2) "\n"))
       (forward-line)
       line)))
+
+(defun flatten (list-to-flatten)
+  (cond
+   ((null list-to-flatten) nil)
+   ((atom list-to-flatten) (list list-to-flatten))
+   (t
+    (append (flatten (car list-to-flatten)) (flatten (cdr list-to-flatten))))))
+
+(defun yield-to-buf (elem)
+  (with-current-buffer "*tokens*"
+    (insert (prin1-to-string elem))
+    (insert "\n")))
+
+(defun yield-print (elem)
+  (print elem))
 
 ) ;; tokenizer- namespace end
 

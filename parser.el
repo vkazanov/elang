@@ -6,12 +6,12 @@
 
 (eval-when-compile (require 'names))
 
-(define-namespace tokenizer-
+(define-namespace parser-
 
 ;;; Parser
 ;;; ------
 
-(defvar token-stream
+(defvar-local token-stream
   nil)
 
 (defun parse (tokens)
@@ -24,6 +24,9 @@
   )
 
 (defun parse-compound-stmt ()
+  )
+
+(defun parse-expr ()
   )
 
 )

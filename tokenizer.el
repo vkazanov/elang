@@ -10,12 +10,13 @@
 ;;; Tokenizer entry point
 ;;; ---------------------
 
-(defun tokenize-region (beg end)
+(defun tokenize-region (&optional beg end)
   (interactive (if (use-region-p)
                    (list (region-beginning) (region-end))
                  (list (point-min) (point-max))))
   (unless (and beg end)
-    (error "Empty string"))
+    (setq beg (point-min)
+          end (point-max)))
   (let ((text (buffer-substring-no-properties beg end))
         tokens)
     (cl-flet ((yield (elem) (push elem tokens)))

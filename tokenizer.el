@@ -3,8 +3,6 @@
 ;; In short, this is a straightforward port of CPython's Lib/tokenize.py. See
 ;; the original code for comments.
 
-(require 'token)
-
 (eval-when-compile (require 'names))
 
 (define-namespace tokenizer-

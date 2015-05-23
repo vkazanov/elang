@@ -8,7 +8,7 @@ file_input: (NEWLINE | stmt)* ENDMARKER
 
 funcdef: 'def' NAME parameters ':' suite
 parameters: '(' [varargslist] ')'
-varargslist: (fpdef ['=' test] ',')* ('*' NAME [',' '**' NAME] | '**' NAME) | fpdef ['=' test] (',' fpdef ['=' test])* [',']
+varargslist: (fpdef ['=' test] ',')* | fpdef ['=' test] (',' fpdef ['=' test])* [',']
 fpdef: NAME | '(' fplist ')'
 fplist: fpdef (',' fpdef)* [',']
 
@@ -26,30 +26,25 @@ continue_stmt: 'continue'
 return_stmt: 'return' [testlist]
 assert_stmt: 'assert' test [',' test]
 
-compound_stmt: if_stmt | while_stmt | for_stmt | funcdef
+compound_stmt: if_stmt | while_stmt | funcdef
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
 while_stmt: 'while' test ':' suite ['else' ':' suite]
-for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
-# NB compile.c makes sure that the default except clause is last
-except_clause: 'except' [test [',' test]]
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
 
-test: and_test ('or' and_test)* | lambdef
+test: and_test ('or' and_test)*
 and_test: not_test ('and' not_test)*
 not_test: 'not' not_test | comparison
 comparison: expr (comp_op expr)*
-comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'is'
+comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='
 expr: arith_expr ('|' arith_expr)*
 arith_expr: term (('+'|'-') term)*
 term: factor (('*'|'/'|'%') factor)*
 factor: ('+'|'-') factor | power
 power: atom trailer* ('**' factor)*
-atom: '(' [testlist] ')' | '[' [testlist] ']' | '{' [dictmaker] '}' | '`' testlist '`' | NAME | NUMBER | STRING+
-lambdef: 'lambda' [varargslist] ':' test
+atom: '(' [testlist] ')' | '[' [testlist] ']' | '`' testlist '`' | NAME | NUMBER | STRING+
 trailer: '(' [arglist] ')' | '[' exprlist ']'
 exprlist: expr (',' expr)* [',']
 testlist: test (',' test)* [',']
-dictmaker: test ':' test (',' test ':' test)* [',']
 
-arglist: (argument ',')* (argument [',']| '*' test [',' '**' test] | '**' test)
+arglist: (argument ',')* argument [',']
 argument: [test '='] test	# Really [keyword '='] test

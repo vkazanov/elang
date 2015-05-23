@@ -26,10 +26,25 @@
 (defun parse-compound-stmt ()
   )
 
+(defun parse-test ()
+  )
+
+(defun parse-end-test ()
+  )
+
+(defun parse-not-test ()
+  )
+
+(defun parse-comparison ()
+  )
+
+(defun parse-comp-op ()
+  (print token-stream))
+
 (defun parse-expr ()
   )
 
-(defun parse-arith ()
+(defun parse-arith-expr ()
   )
 
 (defun parse-term ()
@@ -39,6 +54,24 @@
   )
 
 (defun parse-power ()
+  )
+
+(defun parse-atom ()
+  )
+
+(defun parse-trailer ()
+  )
+
+(defun parse-exprlist ()
+  )
+
+(defun parse-testlist ()
+  )
+
+(defun parse-arglist ()
+  )
+
+(defun parse-argument ()
   )
 
 )

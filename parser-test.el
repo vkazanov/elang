@@ -8,20 +8,28 @@
 ;;; Tests
 ;;; -----
 
+(ert-deftest parser-test-comp-op ()
+  (dolist (op (list "<" ">" "==" ">=" "<=" "<>" "!="))
+    (parser-test-with-tokenized op
+      (let ((token (first tokens)))
+        (should (eq (first token) 'OP))
+        (should (equal (second token) op))
+        (should (eq (parser-parse-comp-op)
+                    (make-symbol op)))
+        ))))
+
 (ert-deftest parser-test-expr ()
-  "Check basic expression parsing"
   (parser-test-with-tokenized "(a + b) * 2"
-    (print tokens)
     (should (equal '(* (+ a b) 2)
                    (parser-parse-expr)))))
 
 ;;; Utils
-;;; ----------
+;;; -----
 
 (defmacro parser-test-with-tokenized (code &rest body)
   (declare (indent 1))
   `(with-temp-buffer
      (insert ,code)
-     (let ((tokens (tokenizer-tokenize-region)))
+     (let* ((tokens (reverse (tokenizer-tokenize-region))))
        (setq-local parser-token-stream tokens)
        ,@body)))

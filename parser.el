@@ -54,15 +54,32 @@
   )
 
 (defun parse-term ()
-  )
+  (destructuring-bind
+      (type value start end line) (pop token-stream)
+    (when  (or (not (eq type 'OP))
+               (not (member value comp-ops)))
+      (throw 'parser-error "Unexpected token"))
+    (intern value)))
 
-(defun parse-factor ()
-  )
+(defun parse-atom ()
+  (destructuring-bind
+      (type value start end line) (pop token-stream)
+    (cond
+     ((eq type 'NAME)
+      (message "NAME: %s" value)
+      (intern value))
+     ((eq type 'NUMBER)
+      (message "NUMBER: %s" value)
+      (string-to-number value))
+     ((eq type 'STRING)
+      (message "STRING: %s" value)
+      (read value))
+     (t (throw 'parser-error "Unexpected token")))))
 
 (defun parse-power ()
   )
 
-(defun parse-atom ()
+(defun parse-factor ()
   )
 
 (defun parse-trailer ()

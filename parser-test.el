@@ -17,10 +17,21 @@
         (should (eq (parser-parse-comp-op)
                     (intern op)))))))
 
-(ert-deftest parser-test-expr ()
-  (parser-test-with-tokenized "(a + b) * 2"
-    (should (equal '(* (+ a b) 2)
-                   (parser-parse-expr)))))
+(ert-deftest parser-test-atom ()
+  (loop for text in (list "name" "123" "\"a string\"")
+        for token-type in (list 'NAME 'NUMBER 'STRING)
+        for parse-res in (list 'name 123 "a string")
+        do (parser-test-with-tokenized text
+             (let ((token (first tokens)))
+               (should (eq (first token)
+                           token-type))
+               (should (equal (parser-parse-atom)
+                              parse-res))))))
+
+;; (ert-deftest parser-test-expr ()
+;;   (parser-test-with-tokenized "(a + b) * 2"
+;;     (should (equal '(* (+ a b) 2)
+;;                    (parser-parse-expr)))))
 
 ;;; Utils
 ;;; -----

@@ -1,0 +1,55 @@
+# Grammar for Python
+#
+# Extracted from the CPython 1.6 source and simplified as much as possible. Used
+# as a reference only.
+#
+single_input: NEWLINE | simple_stmt | compound_stmt NEWLINE
+file_input: (NEWLINE | stmt)* ENDMARKER
+
+funcdef: 'def' NAME parameters ':' suite
+parameters: '(' [varargslist] ')'
+varargslist: (fpdef ['=' test] ',')* ('*' NAME [',' '**' NAME] | '**' NAME) | fpdef ['=' test] (',' fpdef ['=' test])* [',']
+fpdef: NAME | '(' fplist ')'
+fplist: fpdef (',' fpdef)* [',']
+
+stmt: simple_stmt | compound_stmt
+simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
+small_stmt: expr_stmt | print_stmt  | del_stmt | pass_stmt | flow_stmt | assert_stmt
+expr_stmt: testlist ('=' testlist)*
+# For assignments, additional restrictions enforced by the interpreter
+print_stmt: 'print' (test ',')* [test]
+del_stmt: 'del' exprlist
+pass_stmt: 'pass'
+flow_stmt: break_stmt | continue_stmt | return_stmt
+break_stmt: 'break'
+continue_stmt: 'continue'
+return_stmt: 'return' [testlist]
+assert_stmt: 'assert' test [',' test]
+
+compound_stmt: if_stmt | while_stmt | for_stmt | funcdef
+if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]
+while_stmt: 'while' test ':' suite ['else' ':' suite]
+for_stmt: 'for' exprlist 'in' testlist ':' suite ['else' ':' suite]
+# NB compile.c makes sure that the default except clause is last
+except_clause: 'except' [test [',' test]]
+suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT
+
+test: and_test ('or' and_test)* | lambdef
+and_test: not_test ('and' not_test)*
+not_test: 'not' not_test | comparison
+comparison: expr (comp_op expr)*
+comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'is'
+expr: arith_expr ('|' arith_expr)*
+arith_expr: term (('+'|'-') term)*
+term: factor (('*'|'/'|'%') factor)*
+factor: ('+'|'-') factor | power
+power: atom trailer* ('**' factor)*
+atom: '(' [testlist] ')' | '[' [testlist] ']' | '{' [dictmaker] '}' | '`' testlist '`' | NAME | NUMBER | STRING+
+lambdef: 'lambda' [varargslist] ':' test
+trailer: '(' [arglist] ')' | '[' exprlist ']'
+exprlist: expr (',' expr)* [',']
+testlist: test (',' test)* [',']
+dictmaker: test ':' test (',' test ':' test)* [',']
+
+arglist: (argument ',')* (argument [',']| '*' test [',' '**' test] | '**' test)
+argument: [test '='] test	# Really [keyword '='] test

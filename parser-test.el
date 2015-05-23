@@ -11,7 +11,7 @@
 (ert-deftest parser-test-expr ()
   "Check basic expression parsing"
   (parser-test-with-tokenized "(a + b) * 2"
-    (setq-local parser-token-stream tokens)
+    (print tokens)
     (should (equal '(* (+ a b) 2)
                    (parser-parse-expr)))))
 
@@ -23,4 +23,5 @@
   `(with-temp-buffer
      (insert ,code)
      (let ((tokens (tokenizer-tokenize-region)))
+       (setq-local parser-token-stream tokens)
        ,@body)))

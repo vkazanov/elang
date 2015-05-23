@@ -29,4 +29,16 @@
 (defun parse-expr ()
   )
 
+(defun parse-arith ()
+  )
+
+(defun parse-term ()
+  )
+
+(defun parse-factor ()
+  )
+
+(defun parse-power ()
+  )
+
 )

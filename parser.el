@@ -99,8 +99,4 @@
 
 ) ;; end parser- namespace
 
-
-;;; Utils
-;;; -----
-
 (provide 'parser)

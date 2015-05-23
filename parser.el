@@ -11,7 +11,7 @@
 ;;; Parser
 ;;; ------
 
-(defvar-local token-stream
+(defvar token-stream
   nil)
 
 (defun parse (tokens)
@@ -38,8 +38,14 @@
 (defun parse-comparison ()
   )
 
+(defconst comp-ops (list "<" ">" "==" ">=" "<=" "<>" "!="))
 (defun parse-comp-op ()
-  (print token-stream))
+  (destructuring-bind
+      (type value start end line) (pop token-stream)
+    (when  (or (not (eq type 'OP))
+               (not (member value comp-ops)))
+      (throw 'parser-error "Unexpected token"))
+    (intern value)))
 
 (defun parse-expr ()
   )
@@ -74,4 +80,10 @@
 (defun parse-argument ()
   )
 
-)
+) ;; end parser- namespace
+
+
+;;; Utils
+;;; -----
+
+(provide 'parser)

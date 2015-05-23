@@ -36,13 +36,11 @@ and_test: not_test ('and' not_test)*
 not_test: 'not' not_test | comparison
 comparison: expr (comp_op expr)*
 comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='
-expr: arith_expr ('|' arith_expr)*
-arith_expr: term (('+'|'-') term)*
+expr: term (('+'|'-') term)*
 term: factor (('*'|'/'|'%') factor)*
 factor: ('+'|'-') factor | power
-power: atom trailer* ('**' factor)*
-atom: '(' [testlist] ')' | '[' [testlist] ']' | '`' testlist '`' | NAME | NUMBER | STRING+
-trailer: '(' [arglist] ')' | '[' exprlist ']'
+power: atom ('**' factor)*
+atom: '(' [testlist] ')' | '[' [testlist] ']' | NAME | NUMBER | STRING+
 exprlist: expr (',' expr)* [',']
 testlist: test (',' test)* [',']
 

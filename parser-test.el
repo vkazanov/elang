@@ -15,8 +15,7 @@
         (should (eq (first token) 'OP))
         (should (equal (second token) op))
         (should (eq (parser-parse-comp-op)
-                    (make-symbol op)))
-        ))))
+                    (intern op)))))))
 
 (ert-deftest parser-test-expr ()
   (parser-test-with-tokenized "(a + b) * 2"

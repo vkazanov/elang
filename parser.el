@@ -126,12 +126,6 @@
       (push (parse-test) testlist))
     (reverse testlist)))
 
-(defun parse-arglist ()
-  )
-
-(defun parse-argument ()
-  )
-
 ;;; Utils
 ;;; -----
 

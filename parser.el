@@ -66,18 +66,22 @@
       (type value start end line) (pop token-stream)
     (cond
      ((eq type 'NAME)
-      (message "NAME: %s" value)
       (intern value))
      ((eq type 'NUMBER)
-      (message "NUMBER: %s" value)
       (string-to-number value))
      ((eq type 'STRING)
-      (message "STRING: %s" value)
       (read value))
      (t (throw 'parser-error "Unexpected token")))))
 
 (defun parse-power ()
-  )
+  (let ((atom (parse-atom)))
+    (destructuring-bind
+        (type value start end line) (car token-stream)
+      (cond
+       ((and (eq type 'OP) (equal "**" value))
+        (pop token-stream)
+        (list (intern "**") atom (parse-power)))
+       (t atom)))))
 
 (defun parse-factor ()
   )

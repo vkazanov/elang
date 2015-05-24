@@ -28,6 +28,22 @@
                (should (equal (parser-parse-atom)
                               parse-res))))))
 
+(ert-deftest parser-test-power ()
+  (parser-test-with-tokenized "123"
+    (let ((token (first tokens)))
+      (should (eq (first token)
+                  'NUMBER))
+      (should (equal "123"
+                     (second token)))
+      (should (equal 123
+                     (parser-parse-atom)))))
+  (parser-test-with-tokenized "123**2"
+    (should (equal (parser-parse-power)
+                   '(** 123 2))))
+  (parser-test-with-tokenized "123**2**3"
+    (should (equal (parser-parse-power)
+                   '(** 123 (** 2 3))))))
+
 ;; (ert-deftest parser-test-expr ()
 ;;   (parser-test-with-tokenized "(a + b) * 2"
 ;;     (should (equal '(* (+ a b) 2)

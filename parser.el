@@ -30,7 +30,7 @@
      ((and (eq type 'OP)
            (equal value "("))
       (let ((testlist (parse-testlist)))
-        (pop token-stream)
+        (pop-current-token 'OP '(")"))
         (if (consp testlist) (car testlist)
           testlist)))
      ((eq type 'NAME)
@@ -141,6 +141,12 @@
          (if check-values
              (member value check-values)
            t))))
+
+(defun pop-current-token (check-type &optional check-values)
+  (if (check-current-token check-type check-values)
+      (pop token-stream)
+    (throw 'parser-error "Unexpected token")))
+
 
 (defalias 'dbind 'destructuring-bind)
 

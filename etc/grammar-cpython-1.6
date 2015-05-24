@@ -43,6 +43,3 @@ power: atom ('**' factor)*
 atom: '(' [testlist] ')' | NAME | NUMBER | STRING
 exprlist: expr (',' expr)*
 testlist: test (',' test)*
-
-arglist: (argument ',')* argument [',']
-argument: [test '='] test	# Really [keyword '='] test

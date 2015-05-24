@@ -13,9 +13,10 @@
         (list "name" "123" "\"a string\"" "1" "(1 + 2)" "(1 + (1 + 2))")
         for parse-res in
         (list 'name 123 "a string" 1 '(+ 1 2) '(+ 1 (+ 1 2)))
-        do (parser-test-with-tokenized text
-             (should (equal (parser-parse-atom)
-                            parse-res)))))
+        do
+        (parser-test-with-tokenized text
+          (should (equal (parser-parse-atom)
+                         parse-res)))))
 
 (ert-deftest parser-test-power ()
   (parser-test-with-tokenized "123"

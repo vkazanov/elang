@@ -8,15 +8,6 @@
 ;;; Tests
 ;;; -----
 
-(ert-deftest parser-test-comp-op ()
-  (dolist (op (list "<" ">" "==" ">=" "<=" "<>" "!="))
-    (parser-test-with-tokenized op
-      (let ((token (first tokens)))
-        (should (eq (first token) 'OP))
-        (should (equal (second token) op))
-        (should (eq (parser-parse-comp-op)
-                    (intern op)))))))
-
 (ert-deftest parser-test-atom ()
   (loop for text in (list "name" "123" "\"a string\"")
         for token-type in (list 'NAME 'NUMBER 'STRING)
@@ -80,6 +71,49 @@
     (should (equal '(- 123 456)
                    (parser-parse-expr)))))
 
+(ert-deftest parser-test-comp-op ()
+  (dolist (op parser-comp-ops)
+    (parser-test-with-tokenized op
+      (let ((token (first tokens)))
+        (should (eq (first token) 'OP))
+        (should (equal (second token) op))
+        (should (eq (parser-parse-comp-op)
+                    (intern op)))))))
+
+(ert-deftest parser-test-comparison ()
+  (parser-test-with-tokenized "1"
+    (should (equal '1
+                   (parser-parse-comparison))))
+  (parser-test-with-tokenized "1 < 2"
+    (should (equal '(< 1 2)
+                   (parser-parse-comparison))))
+  (parser-test-with-tokenized "1 < 2 < 3"
+    (should (equal '(< (< 1 2) 3)
+                   (parser-parse-comparison)))))
+
+(ert-deftest parser-test-not-test ()
+  (parser-test-with-tokenized "2"
+    (should (equal 2
+                   (parser-parse-not-test))))
+  (parser-test-with-tokenized "not 2"
+    (should (equal '(not 2)
+                   (parser-parse-not-test)))))
+
+(ert-deftest parser-test-and-test ()
+  (parser-test-with-tokenized "2"
+    (should (equal 2
+                   (parser-parse-and-test))))
+  (parser-test-with-tokenized "2 and 3"
+    (should (equal '(and 2 3)
+                   (parser-parse-and-test)))))
+
+(ert-deftest parser-test-test ()
+  (parser-test-with-tokenized "2"
+    (should (equal 2
+                   (parser-parse-and-test))))
+  (parser-test-with-tokenized "2 or 3"
+    (should (equal '(or 2 3)
+                   (parser-parse-test)))))
 
 ;;; Utils
 ;;; -----

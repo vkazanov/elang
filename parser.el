@@ -66,7 +66,7 @@
     (destructuring-bind
         (type value start end line) (car token-stream)
       (cond
-       ((and (eq type 'OP) (equal "**" value))
+       ((check-current-token 'OP '("**"))
         (pop token-stream)
         (list (intern "**") atom (parse-power)))
        (t atom)))))
@@ -75,7 +75,7 @@
   (destructuring-bind
       (type value start end line) (car token-stream)
     (cond
-     ((and (eq type 'OP) (member value '("+" "-")))
+     ((check-current-token 'OP '("+" "-"))
       (pop token-stream)
       (list (intern value) (parse-factor)))
      (t
@@ -86,8 +86,7 @@
     (destructuring-bind
         (type value start end line) (car token-stream)
       (cond
-       ((and (eq type 'OP)
-             (member value '("*" "/" "%")))
+       ((check-current-token 'OP '("*" "/" "%"))
         (pop token-stream)
         (list (intern value) factor (parse-factor)))
        (t
@@ -98,8 +97,7 @@
     (destructuring-bind
         (type value start end line) (car token-stream)
       (cond
-       ((and (eq type 'OP)
-             (member value '("-" "+")))
+       ((check-current-token 'OP '("-" "+"))
         (pop token-stream)
         (list (intern value) term (parse-term)))
        (t
@@ -107,12 +105,37 @@
 
 (defconst comp-ops (list "<" ">" "==" ">=" "<=" "<>" "!="))
 (defun parse-comp-op ()
+  (when (not (check-current-token 'OP comp-ops))
+    (throw 'parser-error "Unexpected token"))
   (destructuring-bind
       (type value start end line) (pop token-stream)
-    (when  (or (not (eq type 'OP))
-               (not (member value comp-ops)))
-      (throw 'parser-error "Unexpected token"))
     (intern value)))
+
+(defun parse-comparison ()
+  (let ((expr (parse-expr)))
+    (while (check-current-token 'OP comp-ops)
+      (setq expr (list (parse-comp-op) expr (parse-expr))))
+    expr))
+
+(defun parse-not-test ()
+  (cond ((check-current-token 'NAME '("not"))
+         (pop token-stream)
+         (list 'not (parse-not-test)))
+        (t (parse-comparison))))
+
+(defun parse-and-test ()
+  (let ((not-test (parse-not-test)))
+    (while (check-current-token 'NAME '("and"))
+      (pop token-stream)
+      (setq not-test (list 'and not-test (parse-not-test))))
+    not-test))
+
+(defun parse-test ()
+  (let ((test (parse-and-test)))
+    (while (check-current-token 'NAME '("or"))
+      (pop token-stream)
+      (setq test (list 'or test (parse-and-test))))
+    test))
 
 (defun parse-exprlist ()
   )
@@ -125,6 +148,17 @@
 
 (defun parse-argument ()
   )
+
+;;; Utils
+;;; -----
+
+(defun check-current-token (check-type &optional check-values)
+  (destructuring-bind
+      (type value start end line) (car token-stream)
+    (and (eq type check-type)
+         (if check-values
+             (member value check-values)
+           t))))
 
 ) ;; end parser- namespace
 

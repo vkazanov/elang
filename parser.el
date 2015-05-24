@@ -42,16 +42,14 @@
   )
 
 (defun parse-term ()
-  (destructuring-bind
-      (type value start end line) (pop token-stream)
+  (dbind (type value start end line) (pop token-stream)
     (when  (or (not (eq type 'OP))
                (not (member value comp-ops)))
       (throw 'parser-error "Unexpected token"))
     (intern value)))
 
 (defun parse-atom ()
-  (destructuring-bind
-      (type value start end line) (pop token-stream)
+  (dbind (type value start end line) (pop token-stream)
     (cond
      ((eq type 'NAME)
       (intern value))
@@ -63,8 +61,7 @@
 
 (defun parse-power ()
   (let ((atom (parse-atom)))
-    (destructuring-bind
-        (type value start end line) (car token-stream)
+    (dbind (type value start end line) (car token-stream)
       (cond
        ((check-current-token 'OP '("**"))
         (pop token-stream)
@@ -72,8 +69,7 @@
        (t atom)))))
 
 (defun parse-factor ()
-  (destructuring-bind
-      (type value start end line) (car token-stream)
+  (dbind (type value start end line) (car token-stream)
     (cond
      ((check-current-token 'OP '("+" "-"))
       (pop token-stream)
@@ -83,8 +79,7 @@
 
 (defun parse-term ()
   (let ((factor (parse-factor)))
-    (destructuring-bind
-        (type value start end line) (car token-stream)
+    (dbind (type value start end line) (car token-stream)
       (cond
        ((check-current-token 'OP '("*" "/" "%"))
         (pop token-stream)
@@ -94,8 +89,7 @@
 
 (defun parse-expr ()
   (let ((term (parse-term)))
-    (destructuring-bind
-        (type value start end line) (car token-stream)
+    (dbind (type value start end line) (car token-stream)
       (cond
        ((check-current-token 'OP '("-" "+"))
         (pop token-stream)
@@ -107,8 +101,7 @@
 (defun parse-comp-op ()
   (when (not (check-current-token 'OP comp-ops))
     (throw 'parser-error "Unexpected token"))
-  (destructuring-bind
-      (type value start end line) (pop token-stream)
+  (dbind (type value start end line) (pop token-stream)
     (intern value)))
 
 (defun parse-comparison ()
@@ -138,10 +131,18 @@
     test))
 
 (defun parse-exprlist ()
-  )
+  (let ((exprlist (list (parse-expr))))
+    (while (check-current-token 'OP '(","))
+      (pop token-stream)
+      (push (parse-expr) exprlist))
+    (reverse exprlist)))
 
 (defun parse-testlist ()
-  )
+  (let ((testlist (list (parse-test))))
+    (while (check-current-token 'OP '(","))
+      (pop token-stream)
+      (push (parse-test) testlist))
+    (reverse testlist)))
 
 (defun parse-arglist ()
   )
@@ -153,12 +154,13 @@
 ;;; -----
 
 (defun check-current-token (check-type &optional check-values)
-  (destructuring-bind
-      (type value start end line) (car token-stream)
+  (dbind (type value start end line) (car token-stream)
     (and (eq type check-type)
          (if check-values
              (member value check-values)
            t))))
+
+(defalias 'dbind 'destructuring-bind)
 
 ) ;; end parser- namespace
 

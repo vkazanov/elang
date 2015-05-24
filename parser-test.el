@@ -115,6 +115,16 @@
     (should (equal '(or 2 3)
                    (parser-parse-test)))))
 
+(ert-deftest parser-test-exprlist ()
+  (parser-test-with-tokenized "1,2,3"
+    (should (equal '(1 2 3)
+                   (parser-parse-exprlist)))))
+
+(ert-deftest parser-test-testlist ()
+  (parser-test-with-tokenized "1,2,3"
+    (should (equal '(1 2 3)
+                   (parser-parse-testlist)))))
+
 ;;; Utils
 ;;; -----
 

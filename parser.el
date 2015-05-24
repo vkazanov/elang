@@ -17,30 +17,6 @@
 (defun parse (tokens)
   (setq token-stream tokens))
 
-(defun parse-stmt ()
-  )
-
-(defun parse-simple-stmt ()
-  )
-
-(defun parse-compound-stmt ()
-  )
-
-(defun parse-test ()
-  )
-
-(defun parse-end-test ()
-  )
-
-(defun parse-not-test ()
-  )
-
-(defun parse-comparison ()
-  )
-
-(defun parse-arith-expr ()
-  )
-
 (defun parse-term ()
   (dbind (type value start end line) (pop token-stream)
     (when  (or (not (eq type 'OP))
@@ -51,6 +27,12 @@
 (defun parse-atom ()
   (dbind (type value start end line) (pop token-stream)
     (cond
+     ((and (eq type 'OP)
+           (equal value "("))
+      (let ((testlist (parse-testlist)))
+        (pop token-stream)
+        (if (consp testlist) (car testlist)
+          testlist)))
      ((eq type 'NAME)
       (intern value))
      ((eq type 'NUMBER)

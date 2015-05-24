@@ -9,15 +9,13 @@
 ;;; -----
 
 (ert-deftest parser-test-atom ()
-  (loop for text in (list "name" "123" "\"a string\"")
-        for token-type in (list 'NAME 'NUMBER 'STRING)
-        for parse-res in (list 'name 123 "a string")
+  (loop for text in
+        (list "name" "123" "\"a string\"" "1" "(1 + 2)" "(1 + (1 + 2))")
+        for parse-res in
+        (list 'name 123 "a string" 1 '(+ 1 2) '(+ 1 (+ 1 2)))
         do (parser-test-with-tokenized text
-             (let ((token (first tokens)))
-               (should (eq (first token)
-                           token-type))
-               (should (equal (parser-parse-atom)
-                              parse-res))))))
+             (should (equal (parser-parse-atom)
+                            parse-res)))))
 
 (ert-deftest parser-test-power ()
   (parser-test-with-tokenized "123"

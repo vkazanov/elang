@@ -44,10 +44,42 @@
     (should (equal (parser-parse-power)
                    '(** 123 (** 2 3))))))
 
-;; (ert-deftest parser-test-expr ()
-;;   (parser-test-with-tokenized "(a + b) * 2"
-;;     (should (equal '(* (+ a b) 2)
-;;                    (parser-parse-expr)))))
+(ert-deftest parser-test-factor ()
+  (parser-test-with-tokenized "123"
+    (should (equal 123
+                   (parser-parse-factor))))
+  (parser-test-with-tokenized "-123"
+    (should (equal '(- 123)
+                   (parser-parse-factor))))
+  (parser-test-with-tokenized "+123"
+    (should (equal '(+ 123)
+                   (parser-parse-factor)))))
+
+(ert-deftest parser-test-term ()
+  (parser-test-with-tokenized "123"
+    (should (equal 123
+                   (parser-parse-term))))
+  (parser-test-with-tokenized "123 * 456"
+    (should (equal '(* 123 456)
+                   (parser-parse-term))))
+  (parser-test-with-tokenized "123 / 456"
+    (should (equal '(/ 123 456)
+                   (parser-parse-term))))
+  (parser-test-with-tokenized "123 % 456"
+    (should (equal '(% 123 456)
+                   (parser-parse-term)))))
+
+(ert-deftest parser-test-expr ()
+  (parser-test-with-tokenized "123"
+    (should (equal 123
+                   (parser-parse-expr))))
+  (parser-test-with-tokenized "123 + 456"
+    (should (equal '(+ 123 456)
+                   (parser-parse-expr))))
+  (parser-test-with-tokenized "123 - 456"
+    (should (equal '(- 123 456)
+                   (parser-parse-expr)))))
+
 
 ;;; Utils
 ;;; -----

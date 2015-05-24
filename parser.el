@@ -38,18 +38,6 @@
 (defun parse-comparison ()
   )
 
-(defconst comp-ops (list "<" ">" "==" ">=" "<=" "<>" "!="))
-(defun parse-comp-op ()
-  (destructuring-bind
-      (type value start end line) (pop token-stream)
-    (when  (or (not (eq type 'OP))
-               (not (member value comp-ops)))
-      (throw 'parser-error "Unexpected token"))
-    (intern value)))
-
-(defun parse-expr ()
-  )
-
 (defun parse-arith-expr ()
   )
 
@@ -84,10 +72,47 @@
        (t atom)))))
 
 (defun parse-factor ()
-  )
+  (destructuring-bind
+      (type value start end line) (car token-stream)
+    (cond
+     ((and (eq type 'OP) (member value '("+" "-")))
+      (pop token-stream)
+      (list (intern value) (parse-factor)))
+     (t
+      (parse-power)))))
 
-(defun parse-trailer ()
-  )
+(defun parse-term ()
+  (let ((factor (parse-factor)))
+    (destructuring-bind
+        (type value start end line) (car token-stream)
+      (cond
+       ((and (eq type 'OP)
+             (member value '("*" "/" "%")))
+        (pop token-stream)
+        (list (intern value) factor (parse-factor)))
+       (t
+        factor)))))
+
+(defun parse-expr ()
+  (let ((term (parse-term)))
+    (destructuring-bind
+        (type value start end line) (car token-stream)
+      (cond
+       ((and (eq type 'OP)
+             (member value '("-" "+")))
+        (pop token-stream)
+        (list (intern value) term (parse-term)))
+       (t
+        term)))))
+
+(defconst comp-ops (list "<" ">" "==" ">=" "<=" "<>" "!="))
+(defun parse-comp-op ()
+  (destructuring-bind
+      (type value start end line) (pop token-stream)
+    (when  (or (not (eq type 'OP))
+               (not (member value comp-ops)))
+      (throw 'parser-error "Unexpected token"))
+    (intern value)))
 
 (defun parse-exprlist ()
   )

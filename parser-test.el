@@ -162,6 +162,25 @@
     (should (equal '(assert 12)
                    (parser-parse-assert-stmt)))))
 
+(ert-deftest parser-test-small-stmt ()
+  (parser-test-with-tokenized "assert 12"
+    (should (equal '(assert 12)
+                   (parser-parse-small-stmt))))
+  (parser-test-with-tokenized "pass"
+    (should (equal nil
+                   (parser-parse-small-stmt))))
+  (parser-test-with-tokenized "continue"
+    (should (equal 'continue
+                   (parser-parse-small-stmt))))
+  (parser-test-with-tokenized "a + b"
+    (should (equal '(+ a b)
+                   (parser-parse-small-stmt)))))
+
+(ert-deftest parser-test-simple-stmt ()
+  (parser-test-with-tokenized "1;2;3"
+    (should (equal '(progn 1 2 3)
+                   (parser-parse-simple-stmt)))))
+
 ;;; Utils
 ;;; -----
 

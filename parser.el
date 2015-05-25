@@ -122,6 +122,8 @@
         (car testlist)
       (reverse testlist))))
 
+(defconst expr-type-firstset '(STRING NUMBER NAME))
+(defconst expr-val-firstset '("not" "-" "[" "(" "+"))
 (defun parse-expr-stmt ()
   (let ((testlist-left (parse-testlist)))
     (cond ((current-token-p 'OP '("="))
@@ -129,12 +131,12 @@
            (list 'assign testlist-left (parse-testlist)))
           (t testlist-left))))
 
-(defconst flow-firstset '("break" "continue"))
+(defconst flow-val-firstset '("break" "continue" "return"))
 (defun parse-flow-stmt ()
   (let* ((current-token (car token-stream))
          (token-value (cadr current-token)))
     (cond
-     ((current-token-p 'NAME flow-firstset)
+     ((current-token-p 'NAME '("break" "continue"))
       (intern token-value))
      ((current-token-p 'NAME '("return"))
       (parse-return-stmt))
@@ -151,6 +153,39 @@
 (defun parse-assert-stmt ()
   (pop-current-token 'NAME '("assert"))
   (list 'assert (parse-test)))
+
+(defconst small-type-firstset '(STRING NUMBER NAME))
+(defconst small-val-firstset '("return" "assert" "not" "pass" "-" "(" "break" "continue" "+"))
+(defun parse-small-stmt ()
+  (cond
+   ((current-token-in-firstset-p nil
+                                 flow-val-firstset)
+    (parse-flow-stmt))
+   ((current-token-in-firstset-p nil
+                                 '("assert"))
+    (parse-assert-stmt))
+   ((current-token-in-firstset-p nil
+                                 '("pass"))
+    (pop token-stream)
+    nil)
+   ((current-token-in-firstset-p expr-type-firstset
+                                 expr-val-firstset)
+    (parse-expr-stmt))
+   (t (throw 'parser-error "Unexpected token"))))
+
+(defun parse-simple-stmt ()
+  (let ((small-stmts (list (parse-small-stmt))))
+    (when (current-token-p 'OP '(";"))
+      (pop token-stream))
+    (while (current-token-in-firstset-p small-type-firstset
+                                        small-val-firstset)
+      (push (parse-small-stmt) small-stmts)
+      (when (current-token-p 'OP '(";"))
+        (pop token-stream)))
+    (pop-current-token 'NEWLINE)
+    (if (length1-p small-stmts)
+        small-stmts
+      `(progn ,@(reverse small-stmts)))))
 
 ;;; Utils
 ;;; -----

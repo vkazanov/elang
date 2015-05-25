@@ -14,7 +14,7 @@ fplist: fpdef (',' fpdef)* [',']
 
 stmt: simple_stmt | compound_stmt
 simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
-small_stmt: expr_stmt | 'pass' | flow_stmt | assert_stmt
+small_stmt: expr_stmt |  flow_stmt | assert_stmt | 'pass'
 expr_stmt: testlist [('=' testlist)]
 # For assignments, additional restrictions enforced by the interpreter
 flow_stmt: 'break' | 'continue' | return_stmt

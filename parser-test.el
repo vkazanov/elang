@@ -120,9 +120,47 @@
                    (parser-parse-exprlist)))))
 
 (ert-deftest parser-test-testlist ()
+  (parser-test-with-tokenized "v + 2"
+    (should (equal '(+ v 2)
+                   (parser-parse-testlist))))
   (parser-test-with-tokenized "1,2,3"
     (should (equal '(1 2 3)
                    (parser-parse-testlist)))))
+
+(ert-deftest parser-test-expr-stmt ()
+  (parser-test-with-tokenized "v + 2"
+    (should (equal '(+ v 2)
+                   (parser-parse-expr-stmt))))
+  (parser-test-with-tokenized "v + 2 = a + 3"
+    (should (equal '(assign (+ v 2) (+ a 3))
+                   (parser-parse-expr-stmt)))))
+
+(ert-deftest parser-test-flow-stmt ()
+  (parser-test-with-tokenized "break"
+    (should (equal 'break
+                   (parser-parse-expr-stmt))))
+  (parser-test-with-tokenized "continue"
+    (should (equal 'continue
+                   (parser-parse-expr-stmt))))
+  (parser-test-with-tokenized "return"
+    (should (equal 'return
+                   (parser-parse-expr-stmt)))))
+
+(ert-deftest parser-test-return-stmt ()
+  (parser-test-with-tokenized "return"
+    (should (equal 'return
+                   (parser-parse-return-stmt))))
+  (parser-test-with-tokenized "return 1"
+    (should (equal '(return 1)
+                   (parser-parse-return-stmt))))
+  (parser-test-with-tokenized "return 1 + 2"
+    (should (equal '(return (+ 1 2))
+                   (parser-parse-return-stmt)))))
+
+(ert-deftest parser-test-assert-stmt ()
+  (parser-test-with-tokenized "assert 12"
+    (should (equal '(assert 12)
+                   (parser-parse-assert-stmt)))))
 
 ;;; Utils
 ;;; -----

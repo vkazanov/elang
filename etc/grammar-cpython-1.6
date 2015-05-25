@@ -14,15 +14,12 @@ fplist: fpdef (',' fpdef)* [',']
 
 stmt: simple_stmt | compound_stmt
 simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
-small_stmt: expr_stmt | pass_stmt | flow_stmt | assert_stmt
-expr_stmt: testlist ('=' testlist)*
+small_stmt: expr_stmt | 'pass' | flow_stmt | assert_stmt
+expr_stmt: testlist [('=' testlist)]
 # For assignments, additional restrictions enforced by the interpreter
-pass_stmt: 'pass'
-flow_stmt: break_stmt | continue_stmt | return_stmt
-break_stmt: 'break'
-continue_stmt: 'continue'
+flow_stmt: 'break' | 'continue' | return_stmt
 return_stmt: 'return' [testlist]
-assert_stmt: 'assert' test [',' test]
+assert_stmt: 'assert' test
 
 compound_stmt: if_stmt | while_stmt | funcdef
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ['else' ':' suite]

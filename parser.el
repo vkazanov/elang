@@ -17,13 +17,6 @@
 (defun parse (tokens)
   (setq token-stream tokens))
 
-(defun parse-term ()
-  (dbind (type value start end line) (pop token-stream)
-    (when  (or (not (eq type 'OP))
-               (not (member value comp-ops)))
-      (throw 'parser-error "Unexpected token"))
-    (intern value)))
-
 (defun parse-atom ()
   (dbind (type value start end line) (pop token-stream)
     (cond
@@ -31,8 +24,7 @@
            (equal value "("))
       (let ((testlist (parse-testlist)))
         (pop-current-token 'OP '(")"))
-        (if (consp testlist) (car testlist)
-          testlist)))
+        testlist))
      ((eq type 'NAME)
       (intern value))
      ((eq type 'NUMBER)
@@ -45,7 +37,7 @@
   (let ((atom (parse-atom)))
     (dbind (type value start end line) (car token-stream)
       (cond
-       ((check-current-token 'OP '("**"))
+       ((current-token-p 'OP '("**"))
         (pop token-stream)
         (list (intern "**") atom (parse-power)))
        (t atom)))))
@@ -53,7 +45,7 @@
 (defun parse-factor ()
   (dbind (type value start end line) (car token-stream)
     (cond
-     ((check-current-token 'OP '("+" "-"))
+     ((current-token-p 'OP '("+" "-"))
       (pop token-stream)
       (list (intern value) (parse-factor)))
      (t
@@ -63,7 +55,7 @@
   (let ((factor (parse-factor)))
     (dbind (type value start end line) (car token-stream)
       (cond
-       ((check-current-token 'OP '("*" "/" "%"))
+       ((current-token-p 'OP '("*" "/" "%"))
         (pop token-stream)
         (list (intern value) factor (parse-factor)))
        (t
@@ -73,7 +65,7 @@
   (let ((term (parse-term)))
     (dbind (type value start end line) (car token-stream)
       (cond
-       ((check-current-token 'OP '("-" "+"))
+       ((current-token-p 'OP '("-" "+"))
         (pop token-stream)
         (list (intern value) term (parse-term)))
        (t
@@ -81,55 +73,89 @@
 
 (defconst comp-ops (list "<" ">" "==" ">=" "<=" "<>" "!="))
 (defun parse-comp-op ()
-  (when (not (check-current-token 'OP comp-ops))
+  (when (not (current-token-p 'OP comp-ops))
     (throw 'parser-error "Unexpected token"))
   (dbind (type value start end line) (pop token-stream)
     (intern value)))
 
 (defun parse-comparison ()
   (let ((expr (parse-expr)))
-    (while (check-current-token 'OP comp-ops)
+    (while (current-token-p 'OP comp-ops)
       (setq expr (list (parse-comp-op) expr (parse-expr))))
     expr))
 
 (defun parse-not-test ()
-  (cond ((check-current-token 'NAME '("not"))
+  (cond ((current-token-p 'NAME '("not"))
          (pop token-stream)
          (list 'not (parse-not-test)))
         (t (parse-comparison))))
 
 (defun parse-and-test ()
   (let ((not-test (parse-not-test)))
-    (while (check-current-token 'NAME '("and"))
+    (while (current-token-p 'NAME '("and"))
       (pop token-stream)
       (setq not-test (list 'and not-test (parse-not-test))))
     not-test))
 
 (defun parse-test ()
   (let ((test (parse-and-test)))
-    (while (check-current-token 'NAME '("or"))
+    (while (current-token-p 'NAME '("or"))
       (pop token-stream)
       (setq test (list 'or test (parse-and-test))))
     test))
 
 (defun parse-exprlist ()
   (let ((exprlist (list (parse-expr))))
-    (while (check-current-token 'OP '(","))
+    (while (current-token-p 'OP '(","))
       (pop token-stream)
       (push (parse-expr) exprlist))
     (reverse exprlist)))
 
+(defconst testlist-type-firstset '(STRING NUMBER NAME))
+(defconst testlist-val-firstset '("(" "not" "-" "+"))
 (defun parse-testlist ()
   (let ((testlist (list (parse-test))))
-    (while (check-current-token 'OP '(","))
+    (while (current-token-p 'OP '(","))
       (pop token-stream)
       (push (parse-test) testlist))
-    (reverse testlist)))
+    (if (length1-p testlist)
+        (car testlist)
+      (reverse testlist))))
+
+(defun parse-expr-stmt ()
+  (let ((testlist-left (parse-testlist)))
+    (cond ((current-token-p 'OP '("="))
+           (pop token-stream)
+           (list 'assign testlist-left (parse-testlist)))
+          (t testlist-left))))
+
+(defconst flow-firstset '("break" "continue"))
+(defun parse-flow-stmt ()
+  (let* ((current-token (car token-stream))
+         (token-value (cadr current-token)))
+    (cond
+     ((current-token-p 'NAME flow-firstset)
+      (intern token-value))
+     ((current-token-p 'NAME '("return"))
+      (parse-return-stmt))
+     (t (throw 'parser-error "Unexpected token")))))
+
+(defun parse-return-stmt ()
+  (pop-current-token 'NAME '("return"))
+  'return
+  (if (current-token-in-firstset-p testlist-type-firstset
+                                   testlist-val-firstset)
+      (list 'return (parse-testlist))
+    'return))
+
+(defun parse-assert-stmt ()
+  (pop-current-token 'NAME '("assert"))
+  (list 'assert (parse-test)))
 
 ;;; Utils
 ;;; -----
 
-(defun check-current-token (check-type &optional check-values)
+(defun current-token-p (check-type &optional check-values)
   (dbind (type value start end line) (car token-stream)
     (and (eq type check-type)
          (if check-values
@@ -137,10 +163,20 @@
            t))))
 
 (defun pop-current-token (check-type &optional check-values)
-  (if (check-current-token check-type check-values)
+  (if (current-token-p check-type check-values)
       (pop token-stream)
     (throw 'parser-error "Unexpected token")))
 
+(defun current-token-in-firstset-p (type-set val-set)
+  (let* ((token (car token-stream))
+         (type (car token))
+         (value (cadr token)))
+    (when (or (member value val-set)
+              (memq type type-set))
+      t)))
+
+(defun length1-p (l)
+  (= (length l) 1))
 
 (defalias 'dbind 'destructuring-bind)
 

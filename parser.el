@@ -184,7 +184,7 @@
         (pop token-stream)))
     (pop-current-token 'NEWLINE)
     (if (length1-p small-stmts)
-        small-stmts
+        (car small-stmts)
       `(progn ,@(reverse small-stmts)))))
 
 ;;; Utils

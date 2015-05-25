@@ -179,6 +179,9 @@
 (ert-deftest parser-test-simple-stmt ()
   (parser-test-with-tokenized "1;2;3"
     (should (equal '(progn 1 2 3)
+                   (parser-parse-simple-stmt))))
+  (parser-test-with-tokenized "a + b"
+    (should (equal '(+ a b)
                    (parser-parse-simple-stmt)))))
 
 ;;; Utils

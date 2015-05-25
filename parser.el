@@ -23,7 +23,7 @@
      ((and (eq type 'OP)
            (equal value "("))
       (let ((testlist (parse-testlist)))
-        (pop-current-token 'OP '(")"))
+        (check-pop-current-token 'OP '(")"))
         testlist))
      ((eq type 'NAME)
       (intern value))
@@ -143,7 +143,7 @@
      (t (throw 'parser-error "Unexpected token")))))
 
 (defun parse-return-stmt ()
-  (pop-current-token 'NAME '("return"))
+  (check-pop-current-token 'NAME '("return"))
   'return
   (if (current-token-in-firstset-p testlist-type-firstset
                                    testlist-val-firstset)
@@ -151,7 +151,7 @@
     'return))
 
 (defun parse-assert-stmt ()
-  (pop-current-token 'NAME '("assert"))
+  (check-pop-current-token 'NAME '("assert"))
   (list 'assert (parse-test)))
 
 (defconst small-type-firstset '(STRING NUMBER NAME))
@@ -173,6 +173,8 @@
     (parse-expr-stmt))
    (t (throw 'parser-error "Unexpected token"))))
 
+(defconst simple-type-firstset '(STRING NUMBER NAME))
+(defconst simple-val-firstset '("return" "assert" "not" "pass" "-" "(" "break" "continue" "+"))
 (defun parse-simple-stmt ()
   (let ((small-stmts (list (parse-small-stmt))))
     (when (current-token-p 'OP '(";"))
@@ -182,10 +184,25 @@
       (push (parse-small-stmt) small-stmts)
       (when (current-token-p 'OP '(";"))
         (pop token-stream)))
-    (pop-current-token 'NEWLINE)
+    (check-pop-current-token 'NEWLINE)
     (if (length1-p small-stmts)
         (car small-stmts)
       `(progn ,@(reverse small-stmts)))))
+
+(defun parse-suite ()
+  (cond
+   ((current-token-p 'NEWLINE)
+    (pop token-stream)
+    (check-pop-current-token 'INDENT)
+    (let ((stmtlist (list (parse-simple-stmt))))
+      (while (current-token-in-firstset-p simple-type-firstset
+                                          simple-val-firstset)
+        (push (parse-simple-stmt) stmtlist))
+      (check-pop-current-token 'DEDENT)
+      (if (length1-p stmtlist)
+          (car stmtlist)
+        `(progn ,@(reverse stmtlist)))))
+   (t (parse-simple-stmt))))
 
 ;;; Utils
 ;;; -----
@@ -197,7 +214,7 @@
              (member value check-values)
            t))))
 
-(defun pop-current-token (check-type &optional check-values)
+(defun check-pop-current-token (check-type &optional check-values)
   (if (current-token-p check-type check-values)
       (pop token-stream)
     (throw 'parser-error "Unexpected token")))

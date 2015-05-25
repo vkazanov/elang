@@ -184,6 +184,16 @@
     (should (equal '(+ a b)
                    (parser-parse-simple-stmt)))))
 
+(ert-deftest parser-test-suite ()
+  (parser-test-with-tokenized "1"
+    (should (equal 1
+                   (parser-parse-suite))))
+  (parser-test-with-tokenized "stub\n  1\n  2\n"
+    (pop parser-token-stream)
+    (should (equal '(progn 1 2)
+                   (parser-parse-suite)))))
+
+
 ;;; Utils
 ;;; -----
 

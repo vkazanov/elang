@@ -193,6 +193,26 @@
     (should (equal '(progn 1 2)
                    (parser-parse-suite)))))
 
+(ert-deftest parser-test-while ()
+  (parser-test-with-tokenized "while True: 1"
+    (should (equal '(while True
+                      1)
+                   (parser-parse-while))))
+  (parser-test-with-tokenized "while True: \n   a = 1 + 2\n"
+    (should (equal '(while True
+                      (assign a (+ 1 2)))
+                   (parser-parse-while)))))
+
+(ert-deftest parser-test-if ()
+  (parser-test-with-tokenized "if True: 1"
+    (should (equal '(cond True
+                          1 nil nil)
+                   (parser-parse-if))))
+  (parser-test-with-tokenized "if True: 1\nelif False: \n 2\nelse: 3"
+    (should (equal '(cond True
+                          1 ((False . 2)) 3)
+                   (parser-parse-if)))))
+
 
 ;;; Utils
 ;;; -----

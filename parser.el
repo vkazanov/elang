@@ -204,6 +204,35 @@
         `(progn ,@(reverse stmtlist)))))
    (t (parse-simple-stmt))))
 
+(defun parse-while ()
+  (check-pop-current-token 'NAME '("while"))
+  (let ((test (parse-test))
+        suite)
+    (check-pop-current-token 'OP '(":"))
+    (list 'while test (parse-suite))))
+
+;; TODO: simplify
+(defun parse-if ()
+  (check-pop-current-token 'NAME '("if"))
+  (let ((iftest (parse-test))
+        ifsuite
+        eliftestsuites
+        elsesuite)
+    (check-pop-current-token 'OP '(":"))
+    (setq ifsuite (parse-suite))
+    (while (current-token-p 'NAME '("elif"))
+      (pop token-stream)
+      (let ((test (parse-test))
+            suite)
+        (check-pop-current-token 'OP '(":"))
+        (setq suite (parse-suite))
+        (push (cons test suite) eliftestsuites )))
+    (when (current-token-p 'NAME '("else"))
+      (pop token-stream)
+      (check-pop-current-token 'OP '(":"))
+      (setq elsesuite (parse-suite)))
+    (list 'cond iftest ifsuite eliftestsuites elsesuite)))
+
 ;;; Utils
 ;;; -----
 

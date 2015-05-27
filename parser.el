@@ -233,6 +233,30 @@
       (setq elsesuite (parse-suite)))
     (list 'cond iftest ifsuite eliftestsuites elsesuite)))
 
+(defun parse-varargslist ()
+  (let ((args (list (intern (second (check-pop-current-token 'NAME))))))
+    (while (current-token-p 'OP '(","))
+      (pop token-stream)
+      (push (intern (second (check-pop-current-token 'NAME))) args))
+    (reverse args)))
+
+(defun parse-parameters ()
+  (check-pop-current-token 'OP '("("))
+  (let (varargslist)
+    (when (current-token-p 'NAME)
+      (setq varargslist (parse-varargslist)))
+    (check-pop-current-token 'OP '(")"))
+    varargslist))
+
+(defun parse-funcdef ()
+  (check-pop-current-token 'NAME '("def"))
+  (let ((name (second (check-pop-current-token 'NAME)))
+        (params (parse-parameters))
+        body)
+    (check-pop-current-token 'OP '(":"))
+    (setq body (parse-suite))
+    (list 'defun name params body)))
+
 ;;; Utils
 ;;; -----
 

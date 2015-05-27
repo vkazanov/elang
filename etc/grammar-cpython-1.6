@@ -8,9 +8,7 @@ file_input: (NEWLINE | stmt)* ENDMARKER
 
 funcdef: 'def' NAME parameters ':' suite
 parameters: '(' [varargslist] ')'
-varargslist: (fpdef ['=' test] ',')* | fpdef ['=' test] (',' fpdef ['=' test])* [',']
-fpdef: NAME | '(' fplist ')'
-fplist: fpdef (',' fpdef)* [',']
+varargslist: NAME (',' NAME )*
 
 stmt: simple_stmt | compound_stmt
 simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE

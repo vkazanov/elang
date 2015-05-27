@@ -213,6 +213,32 @@
                           1 ((False . 2)) 3)
                    (parser-parse-if)))))
 
+(ert-deftest parser-test-varargslist ()
+  (parser-test-with-tokenized "a"
+    (should (equal '(a)
+                   (parser-parse-varargslist))))
+  (parser-test-with-tokenized "a, b, c"
+    (should (equal '(a b c)
+                   (parser-parse-varargslist)))))
+
+(ert-deftest parser-test-parameters ()
+  (parser-test-with-tokenized "(a)"
+    (should (equal '(a)
+                   (parser-parse-parameters))))
+  (parser-test-with-tokenized "(a, b, c)"
+    (should (equal '(a b c)
+                   (parser-parse-parameters))))
+  (parser-test-with-tokenized "()"
+    (should (equal nil
+                   (parser-parse-parameters)))))
+
+(ert-deftest parser-test-funcdef ()
+  (parser-test-with-tokenized "def vova(a, b, c): return"
+    (should (equal '(defun "vova" (a b c) return)
+                   (parser-parse-funcdef))))
+  (parser-test-with-tokenized "def vova(a, b, c):\n return"
+    (should (equal '(defun "vova" (a b c) return)
+                   (parser-parse-funcdef)))))
 
 ;;; Utils
 ;;; -----

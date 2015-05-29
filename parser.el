@@ -257,6 +257,28 @@
     (setq body (parse-suite))
     (list 'defun name params body)))
 
+(defun parse-compound-stmt ()
+  (cond
+   ((current-token-p 'NAME '("while"))
+    (parse-while))
+   ((current-token-p 'NAME '("def"))
+    (parse-funcdef))
+   ((current-token-p 'NAME '("if"))
+    (parse-if))
+   (t (throw 'parser-error "Unexpected token"))))
+
+(defun parse-stmt ()
+  (cond
+   ((current-token-p 'NAME '("while" "def" "if"))
+    (parse-compound-stmt))
+   ((or (current-token-p 'NAME '("return" "assert" "not" "pass" "break" "continue") )
+        (current-token-p 'OP '("-" "(" "+"))
+        (current-token-p 'STRING )
+        (current-token-p 'NUMBER)
+        (current-token-p 'NAME))
+    (parse-simple-stmt))
+   (t (throw 'parser-error "Unexpected token"))))
+
 ;;; Utils
 ;;; -----
 

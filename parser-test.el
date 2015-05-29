@@ -240,6 +240,25 @@
     (should (equal '(defun "vova" (a b c) return)
                    (parser-parse-funcdef)))))
 
+(ert-deftest parser-test-compound-stmt ()
+  (parser-test-with-tokenized "while True: return"
+    (should (equal '(while True return)
+                   (parser-parse-compound-stmt))))
+  (parser-test-with-tokenized "def vova(): pass"
+    (should (equal '(defun "vova" nil nil)
+                   (parser-parse-compound-stmt))))
+  (parser-test-with-tokenized "if True: pass"
+    (should (equal '(cond True nil nil nil)
+                   (parser-parse-compound-stmt)))))
+
+(ert-deftest parser-test-stmt ()
+  (parser-test-with-tokenized "while True: return"
+    (should (equal '(while True return)
+                   (parser-parse-stmt))))
+  (parser-test-with-tokenized "1;2;3"
+    (should (equal '(progn 1 2 3)
+                   (parser-parse-stmt)))))
+
 ;;; Utils
 ;;; -----
 

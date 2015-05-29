@@ -197,7 +197,7 @@
     (let ((stmtlist (list (parse-simple-stmt))))
       (while (current-token-in-firstset-p simple-type-firstset
                                           simple-val-firstset)
-        (push (parse-simple-stmt) stmtlist))
+        (push (parse-stmt) stmtlist))
       (check-pop-current-token 'DEDENT)
       (if (length1-p stmtlist)
           (car stmtlist)

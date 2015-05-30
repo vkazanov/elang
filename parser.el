@@ -195,8 +195,8 @@
     (pop token-stream)
     (check-pop-current-token 'INDENT)
     (let ((stmtlist (list (parse-simple-stmt))))
-      (while (current-token-in-firstset-p simple-type-firstset
-                                          simple-val-firstset)
+      (while (current-token-in-firstset-p stmt-type-firstset
+                                          stmt-val-firstset)
         (push (parse-stmt) stmtlist))
       (check-pop-current-token 'DEDENT)
       (if (length1-p stmtlist)
@@ -267,6 +267,9 @@
     (parse-if))
    (t (throw 'parser-error "Unexpected token"))))
 
+(defconst stmt-type-firstset '(STRING NUMBER NAME OP))
+(defconst stmt-val-firstset
+  '("return" "assert" "if" "not" "pass" "-" "def" "(" "break" "continue" "+" "while"))
 (defun parse-stmt ()
   (cond
    ((current-token-p 'NAME '("while" "def" "if"))
@@ -293,6 +296,18 @@
         (current-token-p 'NAME))
     (parse-simple-stmt))
    (t (throw 'parser-error "Unexpected token"))))
+
+(defun parse-file-input ()
+  (let (res)
+    (while (not (current-token-p 'ENDMARKER))
+      (cond
+       ((or (current-token-p 'NEWLINE)
+            (current-token-p 'NL))
+        (pop token-stream))
+       (t
+        (push (parse-stmt) res))))
+    (check-pop-current-token 'ENDMARKER)
+    (reverse res)))
 
 ;;; Utils
 ;;; -----

@@ -267,6 +267,14 @@
     (should (equal '(progn 1 2 3)
                    (parser-parse-single-input)))))
 
+(ert-deftest parser-test-file-input ()
+  (parser-test-with-tokenized "\n\ns1\n\n"
+    (should (equal '(s1)
+                   (parser-parse-file-input))))
+  (parser-test-with-tokenized "\n\ns1\ns2\n\n"
+    (should (equal '(s1 s2)
+                   (parser-parse-file-input)))))
+
 ;;; Utils
 ;;; -----
 

@@ -259,6 +259,14 @@
     (should (equal '(progn 1 2 3)
                    (parser-parse-stmt)))))
 
+(ert-deftest parser-test-single-input ()
+  (parser-test-with-tokenized "while True: return\n\n"
+    (should (equal '(while True return)
+                   (parser-parse-single-input))))
+  (parser-test-with-tokenized "1;2;3"
+    (should (equal '(progn 1 2 3)
+                   (parser-parse-single-input)))))
+
 ;;; Utils
 ;;; -----
 

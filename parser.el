@@ -279,6 +279,21 @@
     (parse-simple-stmt))
    (t (throw 'parser-error "Unexpected token"))))
 
+(defun parse-single-input ()
+  (cond
+   ((current-token-p 'NEWLINE)
+    (pop token-stream)
+    nil)
+   ((current-token-p 'NAME '("while" "def" "if"))
+    (parse-compound-stmt))
+   ((or (current-token-p 'NAME '("return" "assert" "not" "pass" "break" "continue") )
+        (current-token-p 'OP '("-" "(" "+"))
+        (current-token-p 'STRING )
+        (current-token-p 'NUMBER)
+        (current-token-p 'NAME))
+    (parse-simple-stmt))
+   (t (throw 'parser-error "Unexpected token"))))
+
 ;;; Utils
 ;;; -----
 

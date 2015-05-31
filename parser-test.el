@@ -11,12 +11,12 @@
 (ert-deftest parser-test-atom ()
   (loop for text in
         (list "name" "123" "\"a string\"" "1" "(1 + 2)" "(1 + (1 + 2))")
-        for parse-res in
+        for atom in
         (list 'name 123 "a string" 1 '(+ 1 2) '(+ 1 (+ 1 2)))
         do
         (parser-test-with-tokenized text
           (should (equal (parser-parse-atom)
-                         parse-res)))))
+                         atom)))))
 
 (ert-deftest parser-test-power ()
   (parser-test-with-tokenized "123"
@@ -71,13 +71,10 @@
                    (parser-parse-expr)))))
 
 (ert-deftest parser-test-comp-op ()
-  (dolist (op parser-comp-ops)
-    (parser-test-with-tokenized op
+  (dolist (op-text '(">" "<" "==" "!=" "<>" ">=" "<="))
+    (parser-test-with-tokenized op-text
       (let ((token (first tokens)))
-        (should (eq (first token) 'OP))
-        (should (equal (second token) op))
-        (should (eq (parser-parse-comp-op)
-                    (intern op)))))))
+        (should (memq (first token) parser-comp-ops))))))
 
 (ert-deftest parser-test-comparison ()
   (parser-test-with-tokenized "1"

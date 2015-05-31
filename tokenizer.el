@@ -374,7 +374,7 @@ token is list of the following form:
                           (setq parenlev (1+ parenlev)))
                          ((member initial '(?\) ?\] ?\}))
                           (setq parenlev (1- parenlev))))
-                        (funcall yield (list 'OP
+                        (funcall yield (list (gethash token opmap)
                                              token spos epos line))))))
                    (t
                     (funcall yield (list 'ERRORTOKEN
@@ -417,8 +417,8 @@ string with no properties, nil if EOF is reached"
 (defun yield-print (elem)
   (print elem))
 
-;;; Mapping OP values to OP tokens
-;;; ------------------------------
+;;; Mapping OP values to operator tokens
+;;; ------------------------------------
 
 (defconst opmap (make-hash-table :test 'equal))
 (defconst opmap-raw "
@@ -434,6 +434,7 @@ string with no properties, nil if EOF is reached"
 < LESS
 > GREATER
 = EQUAL
+% PERCENT
 == EQEQUAL
 != NOTEQUAL
 <> NOTEQUAL
@@ -450,7 +451,8 @@ string with no properties, nil if EOF is reached"
                   ;; should be defined in token.el already
                   (token-value (intern token-name)))
              (puthash op token-value opmap))))
-(eval-when-compile (opmap-initialize opmap-raw))
+(eval-when-compile
+  (opmap-initialize opmap-raw))
 
 ) ;; tokenizer- namespace end
 

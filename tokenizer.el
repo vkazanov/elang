@@ -28,6 +28,13 @@
 ;;; Token regexes and regex-related helper functions
 ;;; ------------------------------------------------
 
+(defun flatten (list-to-flatten)
+  (cond
+   ((null list-to-flatten) nil)
+   ((atom list-to-flatten) (list list-to-flatten))
+   (t
+    (append (flatten (car list-to-flatten)) (flatten (cdr list-to-flatten))))))
+
 ;; Regex helper functions
 ;; TODO: should probably use RX? It should have something similar
 (defun group (&rest choices)
@@ -402,13 +409,6 @@ string with no properties, nil if EOF is reached"
       (forward-line)
       line)))
 
-(defun flatten (list-to-flatten)
-  (cond
-   ((null list-to-flatten) nil)
-   ((atom list-to-flatten) (list list-to-flatten))
-   (t
-    (append (flatten (car list-to-flatten)) (flatten (cdr list-to-flatten))))))
-
 (defun yield-to-buf (elem)
   (with-current-buffer "*tokens*"
     (insert (prin1-to-string elem))
@@ -416,6 +416,41 @@ string with no properties, nil if EOF is reached"
 
 (defun yield-print (elem)
   (print elem))
+
+;;; Mapping OP values to OP tokens
+;;; ------------------------------
+
+(defconst opmap (make-hash-table :test 'equal))
+(defconst opmap-raw "
+\( LPAR
+\) RPAR
+: COLON
+, COMMA
+; SEMI
++ PLUS
+- MINUS
+* STAR
+/ SLASH
+< LESS
+> GREATER
+= EQUAL
+== EQEQUAL
+!= NOTEQUAL
+<> NOTEQUAL
+<= LESSEQUAL
+>= GREATEREQUAL
+** DOUBLESTAR
+")
+(defun opmap-initialize (raw)
+  (cl-loop for pair-str
+           in (split-string raw "[\\\n]" t) do
+           (let* ((pair (split-string pair-str))
+                  (op (car pair))
+                  (token-name (cadr pair))
+                  ;; should be defined in token.el already
+                  (token-value (intern token-name)))
+             (puthash op token-value opmap))))
+(eval-when-compile (opmap-initialize opmap-raw))
 
 ) ;; tokenizer- namespace end
 

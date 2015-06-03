@@ -109,6 +109,9 @@
                    (parser-parse-and-test))))
   (parser-test-with-tokenized "2 or 3"
     (should (equal '(or 2 3)
+                   (parser-parse-test))))
+  (parser-test-with-tokenized "2 and 3"
+    (should (equal '(and 2 3)
                    (parser-parse-test)))))
 
 (ert-deftest parser-test-exprlist ()
@@ -135,13 +138,13 @@
 (ert-deftest parser-test-flow-stmt ()
   (parser-test-with-tokenized "break"
     (should (equal 'break
-                   (parser-parse-expr-stmt))))
+                   (parser-parse-flow-stmt))))
   (parser-test-with-tokenized "continue"
     (should (equal 'continue
-                   (parser-parse-expr-stmt))))
+                   (parser-parse-flow-stmt))))
   (parser-test-with-tokenized "return"
     (should (equal 'return
-                   (parser-parse-expr-stmt)))))
+                   (parser-parse-flow-stmt)))))
 
 (ert-deftest parser-test-return-stmt ()
   (parser-test-with-tokenized "return"

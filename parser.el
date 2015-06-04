@@ -320,7 +320,10 @@
     (memq type token-types)))
 
 (defun token-pop ()
-  (pop token-stream))
+  (let ((res (pop token-stream)))
+    (while (token-is-p 'NL)
+      (pop token-stream))
+    res))
 
 (defun token-pop-or-fail (token-type &optional token-values)
   (if (token-is-p token-type token-values)

@@ -238,6 +238,9 @@
                    (parser-parse-funcdef))))
   (parser-test-with-tokenized "def vova(a, b, c):\n return"
     (should (equal '(defun "vova" (a b c) return)
+                   (parser-parse-funcdef))))
+  (parser-test-with-tokenized "def vova(a, b\n , c):\n return"
+    (should (equal '(defun "vova" (a b c) return)
                    (parser-parse-funcdef)))))
 
 (ert-deftest parser-test-compound-stmt ()

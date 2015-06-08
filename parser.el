@@ -34,42 +34,39 @@
      (t (throw 'parser-error (format "Unexpected token: %s instead of atom" type))))))
 
 (defun parse-power ()
-  (let ((atom (parse-atom)))
-    (dbind (type value start end line) (car token-stream)
-      (cond
-       ((token-is-p 'DOUBLESTAR)
-        (token-pop)
-        (list (intern "**") atom (parse-power)))
-       (t atom)))))
+  (let* ((atom (parse-atom))
+         (res atom))
+    (while (token-is-p 'DOUBLESTAR)
+      (token-pop)
+      (setq res (list (intern "**") res (parse-factor))))
+    res))
 
 (defun parse-factor ()
-  (dbind (type value start end line) (car token-stream)
+  (let ((token-value (second (first token-stream))))
     (cond
      ((token-one-of-p '(MINUS PLUS))
       (token-pop)
-      (list (intern value) (parse-factor)))
+      (list (intern token-value) (parse-factor)))
      (t
       (parse-power)))))
 
 (defun parse-term ()
-  (let ((factor (parse-factor)))
-    (dbind (type value start end line) (car token-stream)
-      (cond
-       ((token-one-of-p '(STAR SLASH PERCENT))
+  (let* ((factor (parse-factor))
+         (res factor))
+    (while (token-one-of-p '(STAR SLASH PERCENT))
+      (let ((token-value (second (first token-stream))))
         (token-pop)
-        (list (intern value) factor (parse-factor)))
-       (t
-        factor)))))
+        (setq res (list (intern token-value) res (parse-factor)))))
+    res))
 
 (defun parse-expr ()
-  (let ((term (parse-term)))
-    (dbind (type value start end line) (car token-stream)
-      (cond
-       ((token-one-of-p '(PLUS MINUS))
+  (let* ((term (parse-term))
+         (res term))
+    (while (token-one-of-p '(PLUS MINUS))
+      (let ((token-value (second (first token-stream))))
         (token-pop)
-        (list (intern value) term (parse-term)))
-       (t
-        term)))))
+        (setq res (list (intern token-value) res (parse-term)))))
+    res))
 
 (defconst comp-ops '(LESS GREATER EQEQUAL GREATEREQUAL LESSEQUAL NOTEQUAL))
 (defun parse-comp-op ()
@@ -91,18 +88,20 @@
         (t (parse-comparison))))
 
 (defun parse-and-test ()
-  (let ((not-test (parse-not-test)))
+  (let* ((not-test (parse-not-test))
+         (res not-test))
     (while (token-is-keyword-p '("and"))
       (token-pop)
-      (setq not-test (list 'and not-test (parse-not-test))))
-    not-test))
+      (setq res (list 'and res (parse-not-test))))
+    res))
 
 (defun parse-test ()
-  (let ((test (parse-and-test)))
+  (let* ((test (parse-and-test))
+         (res test))
     (while (token-is-keyword-p '("or"))
       (token-pop)
-      (setq test (list 'or test (parse-and-test))))
-    test))
+      (setq res (list 'or res (parse-and-test))))
+    res))
 
 (defun parse-exprlist ()
   (let ((exprlist (list (parse-expr))))
@@ -207,7 +206,6 @@
     (token-pop-or-fail 'COLON)
     (list 'while test (parse-suite))))
 
-;; TODO: simplify
 (defun parse-if ()
   (token-pop-or-fail 'KEYWORD '("if"))
   (let ((iftest (parse-test))

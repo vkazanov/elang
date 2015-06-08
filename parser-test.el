@@ -57,6 +57,9 @@
                    (parser-parse-term))))
   (parser-test-with-tokenized "123 % 456"
     (should (equal '(% 123 456)
+                   (parser-parse-term))))
+  (parser-test-with-tokenized "123 % 456 / 5"
+    (should (equal '(/ (% 123 456) 5)
                    (parser-parse-term)))))
 
 (ert-deftest parser-test-expr ()

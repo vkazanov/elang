@@ -27,7 +27,15 @@
   (tokenizer-test-with-tokens "\"a simple string\""
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
-      (should (equal "a simple string" (read (second token)))))))
+      (should (equal "\"a simple string\"" (second token)))))
+  (tokenizer-test-with-tokens "\"\"\"triple string\"\"\""
+    (let ((token (first tokens)))
+      (should (eq 'STRING (first token)))
+      (should (equal "\"\"\"triple string\"\"\"" (second token)))))
+  (tokenizer-test-with-tokens "'single'"
+    (let ((token (first tokens)))
+      (should (eq 'STRING (first token)))
+      (should (equal "'single'" (second token))))))
 
 ;;; Utils
 ;;; -----

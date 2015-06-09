@@ -18,10 +18,16 @@
         for operator-token in tokenizer-test-operator-token-list
         do
         (tokenizer-test-with-tokens operator-str
-          (should (equal 3 (length tokens)))
+          (message "TOKENS: %s" tokens)
           (let ((token (first tokens)))
             (should (eq operator-token (first token)))
             (should (equal operator-str (second token)))))))
+
+(ert-deftest tokenizer-test-strings ()
+  (tokenizer-test-with-tokens "\"a simple string\""
+    (let ((token (first tokens)))
+      (should (eq 'STRING (first token)))
+      (should (equal "a simple string" (read (second token)))))))
 
 ;;; Utils
 ;;; -----

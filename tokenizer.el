@@ -116,10 +116,9 @@ string beginning only. Return the match or nil."
 (defconst regex-name "[a-zA-Z_][a-zA-Z0-9_]*")
 (defconst regex-special (group "\r?\n" "[:;.,`@]"))
 (defconst regex-bracket "[][(){}]")
-(defconst regex-operator (group "\\*\\*=?" ">>=?" "<<=?" "<>" "!="
-                                "//=?"
-                                "[-+\\*/%&|^=<>]=?"
-                                "~"))
+(defconst regex-operator (group "\\*\\*" "<>" "!=" "[<>=]=?"
+                                "//"
+                                "[-+\\*/%=<>]"))
 (defconst regex-funny (group regex-operator regex-bracket regex-special))
 ;; First (or only) line of ' or " string.
 (defconst regex-contstr (group (concat "[uUbB]?[rR]?'[^\n'\\\\]*\\(?:\\\\.[^\n'\\\\]*\\)*"
@@ -146,6 +145,7 @@ string beginning only. Return the match or nil."
 (defconst regex-pseudoextras (group "\\\\\r?\n\\|\\'" regex-comment regex-triple))
 (defconst regex-pseudotoken (concat regex-whitespace (group regex-pseudoextras regex-number
                                                             regex-funny regex-contstr regex-name)))
+
 
 ;;; The tokenizer itself
 ;;; --------------------

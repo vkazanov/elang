@@ -4,6 +4,7 @@
 ;; the original code for comments.
 
 (eval-when-compile (require 'names))
+(require 'cl)
 
 (define-namespace tokenizer-
 
@@ -425,7 +426,6 @@ string with no properties, nil if EOF is reached"
 ;;; Mapping OP values to operator tokens
 ;;; ------------------------------------
 
-(defconst opmap (make-hash-table :test 'equal))
 (defconst opmap-raw "
 \( LPAR
 \) RPAR
@@ -447,17 +447,17 @@ string with no properties, nil if EOF is reached"
 >= GREATEREQUAL
 ** DOUBLESTAR
 ")
-(defun opmap-initialize (raw)
-  (cl-loop for pair-str
-           in (split-string raw "[\\\n]" t) do
-           (let* ((pair (split-string pair-str))
-                  (op (car pair))
-                  (token-name (cadr pair))
-                  ;; should be defined in token.el already
-                  (token-value (intern token-name)))
-             (puthash op token-value opmap))))
-(eval-when-compile
-  (opmap-initialize opmap-raw))
+(defconst opmap nil)
+(eval-when (eval)
+  (setq opmap (make-hash-table :test 'equal))
+  (loop for pair-str
+        in (split-string opmap-raw "[\\\n]" t) do
+        (let* ((pair (split-string pair-str))
+               (op (car pair))
+               (token-name (cadr pair))
+               ;; should be defined in token.el already
+               (token-value (intern token-name)))
+          (puthash op token-value opmap))))
 
 ) ;; tokenizer- namespace end
 

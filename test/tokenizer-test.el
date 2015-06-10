@@ -3,9 +3,7 @@
 ;;; Tests for tokenizer.el.
 
 (require 'tokenizer)
-
-;;; Tests
-;;; -----
+(require 'cl)
 
 (defconst tokenizer-test-operator-str-list
   '("-" "+" "/" "*" "**" "%" "==" "="
@@ -17,32 +15,21 @@
   (loop for operator-str in tokenizer-test-operator-str-list
         for operator-token in tokenizer-test-operator-token-list
         do
-        (tokenizer-test-with-tokens operator-str
-          (message "TOKENS: %s" tokens)
+        (with-tokenized operator-str
           (let ((token (first tokens)))
             (should (eq operator-token (first token)))
             (should (equal operator-str (second token)))))))
 
 (ert-deftest tokenizer-test-strings ()
-  (tokenizer-test-with-tokens "\"a simple string\""
+  (with-tokenized "\"a simple string\""
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
       (should (equal "\"a simple string\"" (second token)))))
-  (tokenizer-test-with-tokens "\"\"\"triple string\"\"\""
+  (with-tokenized "\"\"\"triple string\"\"\""
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
       (should (equal "\"\"\"triple string\"\"\"" (second token)))))
-  (tokenizer-test-with-tokens "'single'"
+  (with-tokenized "'single'"
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
       (should (equal "'single'" (second token))))))
-
-;;; Utils
-;;; -----
-
-(defmacro tokenizer-test-with-tokens (code &rest body)
-  (declare (indent 1))
-  `(with-temp-buffer
-     (insert ,code)
-     (let* ((tokens (reverse (tokenizer-tokenize-region))))
-       ,@body)))

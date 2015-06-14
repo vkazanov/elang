@@ -12,18 +12,26 @@
   (let (codes
         constants)
     (cl-labels
-        ((compile (tree)
-                  (cond
-                   ((or (symbolp tree)
-                        (numberp tree))
-                    (push `(byte-constant . ,(length constants)) codes)
-                    (push tree constants))
-                   ((listp tree)
-                    (mapc #'compile tree)
-                    (push `(byte-call . ,(1- (length tree))) codes))
-                   (t (error "not implemented") ))))
+        ((emit-code
+          (code &optional arg)
+          (push `(,code . ,arg) codes))
+         (compile
+          (tree)
+          (cond
+           ((symbolp tree)
+            (emit-code 'byte-varref (length constants))
+            (push tree constants))
+           ((numberp tree)
+            (emit-code 'byte-constant (length constants))
+            (push tree constants))
+           ((listp tree)
+            (emit-code 'byte-constant (length constants))
+            (push (first tree) constants)
+            (mapc #'compile (rest tree))
+            (emit-code 'byte-call (1- (length tree))))
+           (t (error "Cannot compile") ))))
       (compile parse-tree)
-      (push '(byte-return) codes)
+      (emit-code 'byte-return)
       (values (reverse codes) (vconcat (reverse constants))))))
 
 ) ;;; end of compiler- namespace

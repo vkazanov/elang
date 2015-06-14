@@ -3,7 +3,6 @@
 ;; A simple RD parser for small Python subset.
 
 (eval-when-compile (require 'names))
-(require 'tokenizer)
 
 (define-namespace parser-
 

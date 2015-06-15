@@ -54,12 +54,12 @@
     (should (equal [+ a 2]
                    constants))))
 
-;; (ert-deftest compiler-test-if-to-lap ()
-;;   (with-compiled "if a: 1"
-;;     (should (equal '((byte-varref . 0)
-;;                      (byte-goto-if-nil-else-pop . (0  5))
-;;                      (byte-constant . 1)
-;;                      (byte-return))
-;;                    codes))
-;;     (should (equal [a 1]
-;;                    constants))))
+(ert-deftest compiler-test-if-to-lap ()
+  (with-compiled "if a: 1"
+    (should (equal '((byte-varref . 0)
+                     (byte-goto-if-nil-else-pop . (0  5))
+                     (byte-constant . 1)
+                     (byte-return))
+                   codes))
+    (should (equal [a 1]
+                   constants))))

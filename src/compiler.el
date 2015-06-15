@@ -15,18 +15,21 @@
         ((emit-code
           (code &optional arg)
           (push `(,code . ,arg) codes))
+         (add-constant
+          (constant)
+          (push constant constants))
          (compile
           (tree)
           (cond
            ((symbolp tree)
             (emit-code 'byte-varref (length constants))
-            (push tree constants))
+            (add-constant tree))
            ((numberp tree)
             (emit-code 'byte-constant (length constants))
-            (push tree constants))
+            (add-constant tree))
            ((listp tree)
             (emit-code 'byte-constant (length constants))
-            (push (first tree) constants)
+            (add-constant (first tree))
             (mapc #'compile (rest tree))
             (emit-code 'byte-call (1- (length tree))))
            (t (error "Cannot compile") ))))

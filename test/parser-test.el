@@ -205,12 +205,12 @@
 
 (ert-deftest parser-test-if ()
   (with-tokenized "if True: 1"
-    (should (equal '(cond True
-                          1 nil nil)
+    (should (equal '(if True
+                        1 nil nil)
                    (parser-parse-if))))
   (with-tokenized "if True: 1\nelif False: \n 2\nelse: 3"
-    (should (equal '(cond True
-                          1 ((False . 2)) 3)
+    (should (equal '(if True
+                        1 ((False . 2)) 3)
                    (parser-parse-if)))))
 
 (ert-deftest parser-test-varargslist ()
@@ -251,7 +251,7 @@
     (should (equal '(defun "vova" nil nil)
                    (parser-parse-compound-stmt))))
   (with-tokenized "if True: pass"
-    (should (equal '(cond True nil nil nil)
+    (should (equal '(if True nil nil nil)
                    (parser-parse-compound-stmt)))))
 
 (ert-deftest parser-test-stmt ()

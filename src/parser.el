@@ -223,7 +223,7 @@
       (token-pop)
       (token-pop-or-fail 'COLON)
       (setq elsesuite (parse-suite)))
-    (list 'cond iftest ifsuite eliftestsuites elsesuite)))
+    (list 'if iftest ifsuite eliftestsuites elsesuite)))
 
 (defun parse-varargslist ()
   (let ((args (list (intern (second (token-pop-or-fail 'NAME))))))

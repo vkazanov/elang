@@ -57,9 +57,35 @@
 (ert-deftest compiler-test-if-to-lap ()
   (with-compiled "if a: 1"
     (should (equal '((byte-varref . 0)
-                     (byte-goto-if-nil-else-pop . (0  5))
+                     (byte-goto-if-nil-else-pop . (0 5))
                      (byte-constant . 1)
                      (byte-return))
                    codes))
     (should (equal [a 1]
+                   constants))))
+
+(ert-deftest compiler-test-if-then-to-lap ()
+  (with-compiled "if a: 1\nelse: 2"
+    (should (equal '((byte-varref . 0)
+                     (byte-goto-if-nil . (0 8))
+                     (byte-constant . 1)
+                     (byte-goto . (0 9))
+                     (byte-constant . 2)
+                     (byte-return))
+                   codes))
+    (should (equal [a 1 2]
+                   constants))))
+
+(ert-deftest compiler-test-if-elif-to-lap ()
+  (with-compiled "if a: 1\nelif b: 2"
+    (should (equal '((byte-varref . 0)
+                     (byte-goto-if-nil 0 8)
+                     (byte-constant . 1)
+                     (byte-goto 0 13)
+                     (byte-varref . 2)
+                     (byte-goto-if-nil-else-pop 0 13)
+                     (byte-constant . 3)
+                     (byte-return))
+                   codes))
+    (should (equal [a 1 b 2]
                    constants))))

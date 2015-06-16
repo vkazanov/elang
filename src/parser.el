@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t -*-
 ;;
-;; A simple RD parser for small Python subset.
+;; A simple RD parser for a small Python subset.
 
 (eval-when-compile (require 'names))
 
@@ -207,11 +207,11 @@
 (defun parse-if ()
   (token-pop-or-fail 'KEYWORD '("if"))
   (let ((iftest (parse-test))
-        ifsuite
+        thensuite
         eliftestsuites
         elsesuite)
     (token-pop-or-fail 'COLON)
-    (setq ifsuite (parse-suite))
+    (setq thensuite (parse-suite))
     (while (token-is-keyword-p '("elif"))
       (token-pop)
       (let ((test (parse-test))
@@ -223,7 +223,15 @@
       (token-pop)
       (token-pop-or-fail 'COLON)
       (setq elsesuite (parse-suite)))
-    (list 'if iftest ifsuite eliftestsuites elsesuite)))
+    (list 'if iftest thensuite
+          (parse-if-build-else (reverse eliftestsuites) elsesuite))))
+
+(defun parse-if-build-else (elifs else)
+  (if elifs (let* ((iftest (caar elifs))
+                   (thensuite (cdar elifs)))
+              (list 'if iftest thensuite
+                    (parse-if-build-else (cdr elifs) else)))
+    else))
 
 (defun parse-varargslist ()
   (let ((args (list (intern (second (token-pop-or-fail 'NAME))))))

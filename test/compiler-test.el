@@ -89,3 +89,39 @@
                    codes))
     (should (equal [a 1 b 2]
                    constants))))
+
+(ert-deftest compiler-test-assign-to-lap ()
+  (with-compiled "x = 1"
+    (should (equal '((byte-constant . 0)
+                     (byte-varbind . 1)
+                     (byte-unbind . 1)
+                     (byte-return))
+                   codes))
+    (should (equal [1 x]
+                   constants)))
+
+  (with-compiled "x = 1;x = 2"
+    (should (equal '((byte-constant . 0)
+                     (byte-varbind . 1)
+                     (byte-constant . 2)
+                     (byte-varset . 1)
+                     (byte-unbind . 1)
+                     (byte-return))
+                   codes))
+    (should (equal [1 x 2]
+                   constants)))
+
+  (with-compiled "x = 1;y = 2"
+    (should (equal '((byte-constant . 0)
+                     (byte-varbind . 1)
+                     (byte-constant . 2)
+                     (byte-varbind . 3)
+                     (byte-unbind . 3)
+                     (byte-unbind . 1)
+                     (byte-return))
+                   codes))
+    (should (equal [1 x 2 y]
+                   constants)))
+
+  ;; TODO: 2 assignments
+  )

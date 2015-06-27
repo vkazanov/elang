@@ -122,6 +122,18 @@
                    codes))
     (should (equal [1 x 2 y]
                    constants)))
-
   ;; TODO: 2 assignments
   )
+
+
+(ert-deftest compiler-test-while-to-lap ()
+  (with-compiled "while a: a"
+    (should (equal '((byte-varref . 0)
+                     (byte-goto-if-nil-else-pop 0 9)
+                     (byte-varref . 1)
+                     (byte-discard)
+                     (byte-goto 0 0)
+                     (byte-return))
+                   codes))
+    (should (equal [a a]
+                   constants))))

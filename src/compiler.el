@@ -35,15 +35,12 @@
                          (emit-code 'byte-constant (length constants))
                          (add-constant tree))
                         ((listp tree)
-                         (cond
-                          ((eq (first tree) 'if)
-                           (compile-if tree))
-                          ((eq (first tree) 'assign)
-                           (compile-assign tree))
-                          ((eq (first tree) 'progn)
-                           (compile-progn tree))
-                          (t
-                           (compile-funcall tree))))
+                         (cl-case (first tree)
+                           ('if (compile-if tree))
+                           ('assign (compile-assign tree))
+                           ('progn (compile-progn tree))
+                           ('while (compile-while tree))
+                           (t (compile-funcall tree))))
                         (t (error "Cannot compile") )))
          ;; Compile a usual function call
          (compile-funcall (tree)
@@ -88,7 +85,20 @@
                                     (emit-code 'byte-varbind constidx)
                                     (add-bind lvalue constidx))
                                    (t
-                                    (emit-code 'byte-varset (cdr bind))))))))
+                                    (emit-code 'byte-varset (cdr bind)))))))
+         ;; Compile a while loop
+         (compile-while (tree)
+                        (let ((testexpr (second tree))
+                              (bodyexpr (third tree)))
+                          ;; correct
+                          (let ((before-while-pc (list 0 pc))
+                                (after-loop-pc (list 0 0)))
+                            (compile-expr testexpr)
+                            (emit-code 'byte-goto-if-nil-else-pop after-loop-pc 3)
+                            (compile-expr bodyexpr)
+                            (emit-code 'byte-discard)
+                            (emit-code 'byte-goto before-while-pc 3)
+                            (setf (second after-loop-pc) pc)))))
       (compile-expr parse-tree)
       (dolist (bind binds)
         (emit-code 'byte-unbind (cdr bind)))

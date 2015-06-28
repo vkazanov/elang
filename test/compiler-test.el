@@ -146,13 +146,13 @@
                    codes))
     (should (equal [nil]
                    constants)))
-  ;; ;; return a form evaluation result
-  ;; (with-compiled "return a"
-  ;;   (should (equal '((byte-varref . 0)
-  ;;                    (byte-return))
-  ;;                  codes))
-  ;;   (should (equal [a]
-  ;;                  constants)))
+  ;; return a form evaluation result
+  (with-compiled "return a"
+    (should (equal '((byte-varref . 0)
+                     (byte-return))
+                   codes))
+    (should (equal [a]
+                   constants)))
   ;; ;; discard prev expr value, return nil
   ;; (with-compiled "a\nreturn"
   ;;   (should (equal '((byte-varref . 0)

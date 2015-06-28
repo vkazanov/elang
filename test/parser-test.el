@@ -143,12 +143,12 @@
     (should (equal 'continue
                    (parser-parse-flow-stmt))))
   (with-tokenized "return"
-    (should (equal 'return
+    (should (equal '(return nil)
                    (parser-parse-flow-stmt)))))
 
 (ert-deftest parser-test-return-stmt ()
   (with-tokenized "return"
-    (should (equal 'return
+    (should (equal '(return nil)
                    (parser-parse-return-stmt))))
   (with-tokenized "return 1"
     (should (equal '(return 1)
@@ -240,18 +240,18 @@
 
 (ert-deftest parser-test-funcdef ()
   (with-tokenized "def vova(a, b, c): return"
-    (should (equal '(defun "vova" (a b c) return)
+    (should (equal '(defun "vova" (a b c) (return nil))
                    (parser-parse-funcdef))))
   (with-tokenized "def vova(a, b, c):\n return"
-    (should (equal '(defun "vova" (a b c) return)
+    (should (equal '(defun "vova" (a b c) (return nil))
                    (parser-parse-funcdef))))
   (with-tokenized "def vova(a, b\n , c):\n return"
-    (should (equal '(defun "vova" (a b c) return)
+    (should (equal '(defun "vova" (a b c) (return nil))
                    (parser-parse-funcdef)))))
 
 (ert-deftest parser-test-compound-stmt ()
   (with-tokenized "while True: return"
-    (should (equal '(while True return)
+    (should (equal '(while True (return nil))
                    (parser-parse-compound-stmt))))
   (with-tokenized "def vova(): pass"
     (should (equal '(defun "vova" nil nil)
@@ -262,7 +262,7 @@
 
 (ert-deftest parser-test-stmt ()
   (with-tokenized "while True: return"
-    (should (equal '(while True return)
+    (should (equal '(while True (return nil))
                    (parser-parse-stmt))))
   (with-tokenized "1;2;3"
     (should (equal '(progn 1 2 3)
@@ -270,7 +270,7 @@
 
 (ert-deftest parser-test-single-input ()
   (with-tokenized "while True: return\n\n"
-    (should (equal '(while True return)
+    (should (equal '(while True (return nil))
                    (parser-parse-single-input))))
   (with-tokenized "1;2;3"
     (should (equal '(progn 1 2 3)

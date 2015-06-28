@@ -144,7 +144,7 @@
   (if (or (token-one-of-p testlist-type-firstset)
           (token-is-keyword-p testlist-val-firstset))
       (list 'return (parse-testlist))
-    'return))
+    (list 'return nil)))
 
 (defun parse-assert-stmt ()
   (token-pop-or-fail 'KEYWORD '("assert"))

@@ -40,6 +40,7 @@
                            ('assign (compile-assign tree))
                            ('progn (compile-progn tree))
                            ('while (compile-while tree))
+                           ('return (compile-return tree))
                            (t (compile-funcall tree))))
                         (t (error "Cannot compile") )))
          ;; Compile a usual function call
@@ -98,11 +99,24 @@
                             (compile-expr bodyexpr)
                             (emit-code 'byte-discard)
                             (emit-code 'byte-goto before-while-pc 3)
-                            (setf (second after-loop-pc) pc)))))
+                            (setf (second after-loop-pc) pc))))
+         ;; Compile a return statement
+         (compile-return (tree)
+                         (let ((retexpr (second tree)))
+                           (if retexpr
+                               (compile-expr retexpr)
+                             (add-constant nil)
+                             (emit-code 'byte-constant (1- (length constants))))
+                           (emit-code 'byte-return))))
       (compile-expr parse-tree)
+      ;; unbind everything
       (dolist (bind binds)
         (emit-code 'byte-unbind (cdr bind)))
-      (emit-code 'byte-return)
+      ;; check if the return is implicit (i.e., when the final bytecode is not a
+      ;; return)
+      (unless (eq (caar codes) 'byte-return)
+        ;; (add-constant nil)
+        (emit-code 'byte-return))
       (values (reverse codes) (vconcat (reverse constants))))))
 
 ) ;;; end of compiler- namespace

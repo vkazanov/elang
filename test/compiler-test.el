@@ -11,7 +11,8 @@
     (should (equal '((byte-constant . 0))
                    codes))
     (should (equal [1]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
 
   (with-compiled-single "1 + 2"
     (should (equal '((byte-constant . 0)
@@ -20,7 +21,8 @@
                      (byte-call . 2))
                    codes))
     (should (equal [+ 1 2]
-                   constants)))
+                   constants))
+    (should (equal 3 depth)))
   (with-compiled-single "1 + 2 + 3"
     (should (equal '((byte-constant . 0)
                      (byte-constant . 1)
@@ -31,14 +33,16 @@
                      (byte-call . 2))
                    codes))
     (should (equal [+ + 1 2 3]
-                   constants))))
+                   constants))
+    (should (equal 4 depth))))
 
 (ert-deftest compiler-test-varref-expr-to-lap ()
   (with-compiled-single "a"
     (should (equal '((byte-varref . 0))
                    codes))
     (should (equal [a]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
 
   (with-compiled-single "a + 2"
     (should (equal '((byte-constant . 0)
@@ -47,7 +51,8 @@
                      (byte-call . 2))
                    codes))
     (should (equal [+ a 2]
-                   constants))))
+                   constants))
+    (should (equal 3 depth))))
 
 (ert-deftest compiler-test-if-to-lap ()
   (with-compiled-single "if a: 1"
@@ -56,7 +61,8 @@
                      (byte-constant . 1))
                    codes))
     (should (equal [a 1]
-                   constants))))
+                   constants))
+    (should (equal 1 depth))))
 
 (ert-deftest compiler-test-if-then-to-lap ()
   (with-compiled-single "if a: 1\nelse: 2"
@@ -80,7 +86,8 @@
                      (byte-constant . 3))
                    codes))
     (should (equal [a 1 b 2]
-                   constants))))
+                   constants))
+    (should (equal 2 depth))))
 
 (ert-deftest compiler-test-assign-to-lap ()
   (with-compiled-single "x = 1"
@@ -89,7 +96,8 @@
                      (byte-unbind . 1))
                    codes))
     (should (equal [1 x]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
 
   (with-compiled-single "x = 1;x = 2"
     (should (equal '((byte-constant . 0)
@@ -101,7 +109,8 @@
                      (byte-unbind . 1))
                    codes))
     (should (equal [1 x 2]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
 
   (with-compiled-single "x = 1;y = 2"
     (should (equal '((byte-constant . 0)
@@ -114,7 +123,8 @@
                      (byte-unbind . 1))
                    codes))
     (should (equal [1 x 2 y]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
   ;; TODO: 2 assignments as x, y = 1, 2
   )
 
@@ -128,7 +138,8 @@
                      (byte-goto 0 0))
                    codes))
     (should (equal [a a]
-                   constants))))
+                   constants))
+    (should (equal 1 depth))))
 
 (ert-deftest compiler-test-return-to-lap ()
   ;; plain return should just return nil
@@ -137,14 +148,16 @@
                      (byte-return))
                    codes))
     (should (equal [nil]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
   ;; return a form evaluation result
   (with-compiled-single "return a"
     (should (equal '((byte-varref . 0)
                      (byte-return))
                    codes))
     (should (equal [a]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
   ;; discard prev expr value, return nil
   (with-compiled-file "a\nreturn\n"
     (should (equal '((byte-varref . 0)
@@ -153,7 +166,8 @@
                      (byte-return))
                    codes))
     (should (equal [a nil]
-                   constants)))
+                   constants))
+    (should (equal 1 depth)))
   ;; lack of return means the same as above
   (with-compiled-file "a\n"
     (should (equal '((byte-varref . 0)
@@ -162,4 +176,5 @@
                      (byte-return))
                    codes))
     (should (equal [a nil]
-                   constants))))
+                   constants))
+    (should (equal 1 depth))))

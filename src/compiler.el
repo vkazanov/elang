@@ -12,14 +12,19 @@
   (let (codes                           ; codes emitted
         constants                       ; constants vector
         (pc 0)                          ; program counter
-        binds)                          ; bound var alist
+        binds                           ; bound var alist
+        (depth 0)                       ; current stack depth
+        (maxdepth 0)                    ; max stack depth
+        )
     (cl-labels
         ( ;; Save a lapcode
          (emit-code (code &optional arg pc-incr)
                     (push `(,code . ,arg) codes)
                     (setq pc (if pc-incr
                                  (+ pc pc-incr)
-                               (1+ pc))))
+                               (1+ pc)))
+                    (setq depth (+ depth (byte-compile-stack-adjustment code arg)))
+                    (setq maxdepth (max depth maxdepth)))
          ;; Push a constant into the constants vector
          (add-constant (constant)
                        (push constant constants))
@@ -123,7 +128,7 @@
         (add-constant nil)
         (emit-code 'byte-constant (1- (length constants)))
         (emit-code 'byte-return))
-      (values (reverse codes) (vconcat (reverse constants))))))
+      (values (reverse codes) (vconcat (reverse constants)) maxdepth))))
 
 ) ;;; end of compiler- namespace
 

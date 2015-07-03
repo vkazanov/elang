@@ -301,7 +301,7 @@
        (t
         (push (parse-stmt) res))))
     (token-pop-or-fail 'ENDMARKER)
-    (reverse res)))
+    `(progn ,@(reverse res))))
 
 ;;; Utils
 ;;; -----

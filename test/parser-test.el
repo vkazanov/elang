@@ -278,8 +278,8 @@
 
 (ert-deftest parser-test-file-input ()
   (with-tokenized "\n\ns1\n\n"
-    (should (equal '(s1)
+    (should (equal '(progn s1)
                    (parser-parse-file-input))))
   (with-tokenized "\n\ns1\ns2\n\n"
-    (should (equal '(s1 s2)
+    (should (equal '(progn s1 s2)
                    (parser-parse-file-input)))))

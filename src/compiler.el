@@ -8,13 +8,13 @@
 
 (define-namespace compiler-
 
-(defun compile-to-lapcode (parse-tree)
+(defun compile-to-lapcode (parse-tree &optional file-input)
   (let (codes                           ; codes emitted
         constants                       ; constants vector
         (pc 0)                          ; program counter
-        binds)                           ; bound var alist
+        binds)                          ; bound var alist
     (cl-labels
-        (;; Save a lapcode
+        ( ;; Save a lapcode
          (emit-code (code &optional arg pc-incr)
                     (push `(,code . ,arg) codes)
                     (setq pc (if pc-incr
@@ -73,7 +73,11 @@
                            (setf (second after-else-pc) pc)))))
          ;; Compile a list of exprs
          (compile-progn (tree)
-                        (mapc #'compile-expr (rest tree)))
+                        (let ((forms (rest tree)))
+                          (while forms
+                            (compile-expr (pop forms))
+                            (unless (eq (caar codes) 'byte-return)
+                              (emit-code 'byte-discard)))))
          ;; Compile an assignment
          (compile-assign (tree)
                          (let ((lvalue (second tree))
@@ -112,10 +116,12 @@
       ;; unbind everything
       (dolist (bind binds)
         (emit-code 'byte-unbind (cdr bind)))
-      ;; check if the return is implicit (i.e., when the final bytecode is not a
-      ;; return)
-      (unless (eq (caar codes) 'byte-return)
-        ;; (add-constant nil)
+      ;; Check if the return is implicit (i.e., when the final bytecode is not a return).
+      ;; This only works for file-input
+      (when (and file-input
+                 (not (eq (caar codes) 'byte-return)))
+        (add-constant nil)
+        (emit-code 'byte-constant (1- (length constants)))
         (emit-code 'byte-return))
       (values (reverse codes) (vconcat (reverse constants))))))
 

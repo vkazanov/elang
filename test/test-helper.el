@@ -20,10 +20,18 @@
        (setq parse-tree (parser-parse-single-input)))
      ,@body))
 
-(defmacro with-compiled (str &rest body)
+(defmacro with-compiled-single (str &rest body)
   (declare (indent 1))
   `(let (parse-tree)
      (with-tokenized ,str
        (setq parse-tree (parser-parse-single-input)))
      (dbind (codes constants) (compiler-compile-to-lapcode parse-tree)
+       ,@body)))
+
+(defmacro with-compiled-file (str &rest body)
+  (declare (indent 1))
+  `(let (parse-tree)
+     (with-tokenized ,str
+       (setq parse-tree (parser-parse-file-input)))
+     (dbind (codes constants) (compiler-compile-to-lapcode parse-tree t)
        ,@body)))

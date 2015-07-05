@@ -30,6 +30,9 @@
                        (push constant constants))
          (add-bind (bindname constidx)
                    (push (cons bindname constidx) binds))
+         (unbind-all ()
+                     (when binds
+                       (emit-code 'byte-unbind (length binds))))
          ;; Compile an expression (main compilation entry point)
          (compile-expr (tree)
                        (cond
@@ -81,7 +84,11 @@
                         (let ((forms (rest tree)))
                           (while forms
                             (compile-expr (pop forms))
-                            (unless (eq (caar codes) 'byte-return)
+                            ;; TODO: dirty, move into compile expr as exprs
+                            ;; know, whether it is needed
+                            (unless (memq (caar codes) '(byte-return
+                                                         byte-varbind
+                                                         byte-varset))
                               (emit-code 'byte-discard)))))
          ;; Compile an assignment
          (compile-assign (tree)
@@ -116,17 +123,16 @@
                                (compile-expr retexpr)
                              (add-constant nil)
                              (emit-code 'byte-constant (1- (length constants))))
+                           (unbind-all)
                            (emit-code 'byte-return))))
       (compile-expr parse-tree)
-      ;; unbind everything
-      (dolist (bind binds)
-        (emit-code 'byte-unbind (cdr bind)))
       ;; Check if the return is implicit (i.e., when the final bytecode is not a return).
       ;; This only works for file-input
       (when (and file-input
                  (not (eq (caar codes) 'byte-return)))
         (add-constant nil)
         (emit-code 'byte-constant (1- (length constants)))
+        (unbind-all)
         (emit-code 'byte-return))
       (values (reverse codes) (vconcat (reverse constants)) maxdepth))))
 

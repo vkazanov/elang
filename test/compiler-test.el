@@ -92,8 +92,7 @@
 (ert-deftest compiler-test-assign-to-lap ()
   (with-compiled-single "x = 1"
     (should (equal '((byte-constant . 0)
-                     (byte-varbind . 1)
-                     (byte-unbind . 1))
+                     (byte-varbind . 1))
                    codes))
     (should (equal [1 x]
                    constants))
@@ -102,11 +101,8 @@
   (with-compiled-single "x = 1;x = 2"
     (should (equal '((byte-constant . 0)
                      (byte-varbind . 1)
-                     (byte-discard)
                      (byte-constant . 2)
-                     (byte-varset . 1)
-                     (byte-discard)
-                     (byte-unbind . 1))
+                     (byte-varset . 1))
                    codes))
     (should (equal [1 x 2]
                    constants))
@@ -115,12 +111,8 @@
   (with-compiled-single "x = 1;y = 2"
     (should (equal '((byte-constant . 0)
                      (byte-varbind . 1)
-                     (byte-discard)
                      (byte-constant . 2)
-                     (byte-varbind . 3)
-                     (byte-discard)
-                     (byte-unbind . 3)
-                     (byte-unbind . 1))
+                     (byte-varbind . 3))
                    codes))
     (should (equal [1 x 2 y]
                    constants))

@@ -12,19 +12,21 @@
   (let (codes                           ; codes emitted
         constants                       ; constants vector
         (pc 0)                          ; program counter
+        (tag-counter 0)                 ; current tag number
         binds                           ; bound var alist
         (depth 0)                       ; current stack depth
         (maxdepth 0)                    ; max stack depth
         )
     (cl-labels
         ( ;; Save a lapcode
-         (emit-code (code &optional arg pc-incr)
+         (emit-code (code &optional arg)
                     (push `(,code . ,arg) codes)
-                    (setq pc (if pc-incr
-                                 (+ pc pc-incr)
-                               (1+ pc)))
                     (setq depth (+ depth (byte-compile-stack-adjustment code arg)))
                     (setq maxdepth (max depth maxdepth)))
+         (emit-tag (tag)
+                   (push tag codes))
+         (make-tag ()
+                   (list 'TAG (setq tag-counter (1+ tag-counter))))
          ;; Push a constant into the constants vector
          (add-constant (constant)
                        (push constant constants))
@@ -69,16 +71,16 @@
                        (compile-expr testexpr)
                        ;; correct target pc can only be set after compiling
                        ;; thenexpr and elseexpr
-                       (let ((after-then-pc (list 0 0))
-                             (after-else-pc (list 0 0)))
-                         (emit-code lapcode after-then-pc 3)
+                       (let ((after-then-tag (make-tag))
+                             (after-else-tag (make-tag)))
+                         (emit-code lapcode after-then-tag)
                          (compile-expr thenexpr)
+                         (emit-tag after-then-tag)
                          (when elseexpr
-                           (emit-code 'byte-goto after-else-pc 3))
-                         (setf (second after-then-pc) pc)
+                           (emit-code 'byte-goto after-else-tag))
                          (when elseexpr
-                           (compile-expr elseexpr)
-                           (setf (second after-else-pc) pc)))))
+                           (compile-expr elseexpr))
+                         (emit-tag after-else-tag))))
          ;; Compile a list of exprs
          (compile-progn (tree)
                         (let ((forms (rest tree)))
@@ -108,14 +110,15 @@
                         (let ((testexpr (second tree))
                               (bodyexpr (third tree)))
                           ;; correct
-                          (let ((before-while-pc (list 0 pc))
-                                (after-loop-pc (list 0 0)))
+                          (let ((before-while-tag (make-tag))
+                                (after-loop-tag (make-tag)))
+                            (emit-tag before-while-tag)
                             (compile-expr testexpr)
-                            (emit-code 'byte-goto-if-nil-else-pop after-loop-pc 3)
+                            (emit-code 'byte-goto-if-nil-else-pop after-loop-tag)
                             (compile-expr bodyexpr)
                             (emit-code 'byte-discard)
-                            (emit-code 'byte-goto before-while-pc 3)
-                            (setf (second after-loop-pc) pc))))
+                            (emit-code 'byte-goto before-while-tag)
+                            (emit-tag after-loop-tag))))
          ;; Compile a return statement
          (compile-return (tree)
                          (let ((retexpr (second tree)))

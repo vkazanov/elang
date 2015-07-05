@@ -1,6 +1,8 @@
 ;; -*- lexical-binding: t -*-
 ;;
 ;;; Tests for tokenizer.el.
+;;
+;; NOTE: tests are incomplete
 
 (require 'tokenizer)
 (require 'cl)

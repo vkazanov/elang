@@ -201,6 +201,12 @@
   (with-tokenized "while True: \n   a = 1 + 2\n"
     (should (equal '(while True
                       (assign a (+ 1 2)))
+                   (parser-parse-while))))
+  (with-tokenized "while True: \n a = 1 + 2\n b = 3"
+    (should (equal '(while True
+                      (progn
+                        (assign a (+ 1 2))
+                        (assign b 3)))
                    (parser-parse-while)))))
 
 (ert-deftest parser-test-if ()

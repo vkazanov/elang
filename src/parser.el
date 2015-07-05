@@ -187,7 +187,7 @@
    ((token-is-p 'NEWLINE)
     (token-pop)
     (token-pop-or-fail 'INDENT)
-    (let ((stmtlist (list (parse-simple-stmt))))
+    (let ((stmtlist (list (parse-stmt))))
       (while (or (token-one-of-p stmt-type-firstset)
                  (token-is-keyword-p stmt-val-firstset))
         (push (parse-stmt) stmtlist))
@@ -268,7 +268,7 @@
     (parse-if))
    (t (throw 'parser-error "Unexpected token: %s" (car (car token-stream))))))
 
-(defconst stmt-type-firstset '(STRING NUMBER MINUS LPAR PLUS))
+(defconst stmt-type-firstset '(NAME STRING NUMBER MINUS LPAR PLUS))
 (defconst stmt-val-firstset
   '("return" "assert" "if" "not" "pass" "def" "break" "continue" "while"))
 (defun parse-stmt ()

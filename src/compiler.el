@@ -11,7 +11,6 @@
 (defun compile-to-lapcode (parse-tree &optional file-input)
   (let (codes                           ; codes emitted
         constants                       ; constants vector
-        (pc 0)                          ; program counter
         (tag-counter 0)                 ; current tag number
         binds                           ; bound var alist
         (depth 0)                       ; current stack depth
@@ -23,8 +22,10 @@
                     (push `(,code . ,arg) codes)
                     (setq depth (+ depth (byte-compile-stack-adjustment code arg)))
                     (setq maxdepth (max depth maxdepth)))
+         ;; Save a tag
          (emit-tag (tag)
                    (push tag codes))
+         ;; Make a tag
          (make-tag ()
                    (list 'TAG (setq tag-counter (1+ tag-counter))))
          ;; Push a constant into the constants vector
@@ -116,7 +117,6 @@
                             (compile-expr testexpr)
                             (emit-code 'byte-goto-if-nil-else-pop after-loop-tag)
                             (compile-expr bodyexpr)
-                            (emit-code 'byte-discard)
                             (emit-code 'byte-goto before-while-tag)
                             (emit-tag after-loop-tag))))
          ;; Compile a return statement

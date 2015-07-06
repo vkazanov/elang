@@ -137,7 +137,7 @@
       (intern token-value))
      ((token-is-keyword-p '("return"))
       (parse-return-stmt))
-     (t (throw 'parser-error "Unexpected token: %s" (car token-stream))))))
+     (t (throw  'parser-error (format "Unexpected token: %s" (car token-stream)))))))
 
 (defun parse-return-stmt ()
   (token-pop-or-fail 'KEYWORD '("return"))
@@ -164,7 +164,7 @@
    ((or (token-one-of-p expr-type-firstset)
         (token-is-keyword-p expr-val-firstset))
     (parse-expr-stmt))
-   (t (throw 'parser-error "Unexpected token: %s" (car token-stream)))))
+   (t (throw 'parser-error (format "Unexpected token: %s" (car token-stream))))))
 
 (defconst simple-type-firstset '(STRING NUMBER NAME MINUS LPAR PLUS))
 (defconst simple-val-firstset '("return" "assert" "not" "pass" "break" "continue"))
@@ -192,10 +192,8 @@
                  (token-is-keyword-p stmt-val-firstset))
         (push (parse-stmt) stmtlist))
       (token-pop-or-fail 'DEDENT)
-      (if (length1-p stmtlist)
-          (car stmtlist)
-        `(progn ,@(reverse stmtlist)))))
-   (t (parse-simple-stmt))))
+      `(progn ,@(reverse stmtlist))))
+   (t `(progn ,(parse-simple-stmt)))))
 
 (defun parse-while ()
   (token-pop-or-fail 'KEYWORD '("while"))
@@ -266,7 +264,7 @@
     (parse-funcdef))
    ((token-is-keyword-p '("if"))
     (parse-if))
-   (t (throw 'parser-error "Unexpected token: %s" (car (car token-stream))))))
+   (t (throw 'parser-error (format "Unexpected token: %s" (car (car token-stream)))))))
 
 (defconst stmt-type-firstset '(NAME STRING NUMBER MINUS LPAR PLUS))
 (defconst stmt-val-firstset
@@ -278,7 +276,7 @@
    ((or (token-is-keyword-p simple-val-firstset )
         (token-one-of-p simple-type-firstset))
     (parse-simple-stmt))
-   (t (throw 'parser-error "Unexpected token: %s" (car token-stream)))))
+   (t (throw 'parser-error (format "Unexpected token: %s" (car token-stream))))))
 
 (defun parse-single-input ()
   (cond
@@ -290,7 +288,7 @@
    ((or (token-is-keyword-p simple-val-firstset)
         (token-one-of-p simple-type-firstset))
     (parse-simple-stmt))
-   (t (throw 'parser-error "Unexpected token: %s" (car token-stream)))))
+   (t (throw 'parser-error (format "Unexpected token: %s" (car token-stream))))))
 
 (defun parse-file-input ()
   (let (res)

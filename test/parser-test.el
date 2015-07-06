@@ -185,8 +185,9 @@
                    (parser-parse-simple-stmt)))))
 
 (ert-deftest parser-test-suite ()
-  (with-tokenized "1"
-    (should (equal 1
+  (with-tokenized "stub\n  1\n"
+    (pop parser-token-stream)
+    (should (equal '(progn 1)
                    (parser-parse-suite))))
   (with-tokenized "stub\n  1\n  2\n"
     (pop parser-token-stream)
@@ -196,11 +197,11 @@
 (ert-deftest parser-test-while ()
   (with-tokenized "while True: 1"
     (should (equal '(while True
-                      1)
+                      (progn 1))
                    (parser-parse-while))))
   (with-tokenized "while True: \n   a = 1 + 2\n"
     (should (equal '(while True
-                      (assign a (+ 1 2)))
+                      (progn (assign a (+ 1 2))))
                    (parser-parse-while))))
   (with-tokenized "while True: \n a = 1 + 2\n b = 3"
     (should (equal '(while True
@@ -211,18 +212,18 @@
 
 (ert-deftest parser-test-if ()
   (with-tokenized "if True: 1"
-    (should (equal '(if True 1 nil)
+    (should (equal '(if True (progn 1) nil)
                    (parser-parse-if))))
   (with-tokenized "if True: 1\nelif False: \n 2\nelse: 3"
-    (should (equal '(if True 1
-                      (if False 2
-                        3))
+    (should (equal '(if True (progn 1)
+                      (if False (progn 2)
+                        (progn 3)))
                    (parser-parse-if))))
   (with-tokenized "if True: 1\nelif False: \n 2\nelif None:\n 3\nelse: 4"
-    (should (equal '(if True 1
-                      (if False 2
-                        (if None 3
-                          4)))
+    (should (equal '(if True (progn 1)
+                      (if False (progn 2)
+                        (if None (progn 3)
+                          (progn 4))))
                    (parser-parse-if)))))
 
 (ert-deftest parser-test-varargslist ()
@@ -246,29 +247,30 @@
 
 (ert-deftest parser-test-funcdef ()
   (with-tokenized "def vova(a, b, c): return"
-    (should (equal '(defun "vova" (a b c) (return nil))
+    (should (equal '(defun "vova" (a b c) (progn (return nil)))
                    (parser-parse-funcdef))))
   (with-tokenized "def vova(a, b, c):\n return"
-    (should (equal '(defun "vova" (a b c) (return nil))
+    (should (equal '(defun "vova" (a b c) (progn (return nil)))
                    (parser-parse-funcdef))))
   (with-tokenized "def vova(a, b\n , c):\n return"
-    (should (equal '(defun "vova" (a b c) (return nil))
+    (should (equal '(defun "vova" (a b c) (progn (return nil)))
                    (parser-parse-funcdef)))))
 
 (ert-deftest parser-test-compound-stmt ()
   (with-tokenized "while True: return"
-    (should (equal '(while True (return nil))
+    (should (equal '(while True
+                      (progn (return nil)))
                    (parser-parse-compound-stmt))))
   (with-tokenized "def vova(): pass"
-    (should (equal '(defun "vova" nil nil)
+    (should (equal '(defun "vova" nil (progn nil))
                    (parser-parse-compound-stmt))))
   (with-tokenized "if True: pass"
-    (should (equal '(if True nil nil)
+    (should (equal '(if True (progn nil) nil)
                    (parser-parse-compound-stmt)))))
 
 (ert-deftest parser-test-stmt ()
   (with-tokenized "while True: return"
-    (should (equal '(while True (return nil))
+    (should (equal '(while True (progn (return nil)))
                    (parser-parse-stmt))))
   (with-tokenized "1;2;3"
     (should (equal '(progn 1 2 3)
@@ -276,7 +278,7 @@
 
 (ert-deftest parser-test-single-input ()
   (with-tokenized "while True: return\n\n"
-    (should (equal '(while True (return nil))
+    (should (equal '(while True (progn (return nil)))
                    (parser-parse-single-input))))
   (with-tokenized "1;2;3"
     (should (equal '(progn 1 2 3)

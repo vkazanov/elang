@@ -76,9 +76,9 @@
                              (after-else-tag (make-tag)))
                          (emit-code lapcode after-then-tag)
                          (compile-expr thenexpr)
-                         (emit-tag after-then-tag)
                          (when elseexpr
                            (emit-code 'byte-goto after-else-tag))
+                         (emit-tag after-then-tag)
                          (when elseexpr
                            (compile-expr elseexpr))
                          (emit-tag after-else-tag))))

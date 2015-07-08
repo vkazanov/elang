@@ -50,3 +50,9 @@
                  3))
   (should (equal (compile-and-run "a = 1\nif a > 10: a = 2\nelif a > 2: a = 3\nelif a > 0: a = 4\nelse: a = 5\nreturn a")
                  4)))
+
+(ert-deftest eval-test-return ()
+  (should (equal (compile-and-run "a = 1\nif a > 1: return 2\nreturn 1")
+                 1))
+  (should (equal (compile-and-run "a = 2\nif a > 1: return a + 1\nreturn 1")
+                 3)))

@@ -47,4 +47,6 @@
   (should (equal (compile-and-run "a = 1\nif not a: a = 2\nelse: a = 3\nreturn a")
                  3))
   (should (equal (compile-and-run "a = 1\nif a > 10: a = 2\nelif a < 2: a = 3\nelse: a = 4\nreturn a")
-                 3)))
+                 3))
+  (should (equal (compile-and-run "a = 1\nif a > 10: a = 2\nelif a > 2: a = 3\nelif a > 0: a = 4\nelse: a = 5\nreturn a")
+                 4)))

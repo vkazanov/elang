@@ -9,7 +9,7 @@
   (loop for text in
         (list "name" "123" "\"a string\"" "1" "(1 + 2)" "(1 + (1 + 2))")
         for atom in
-        (list 'name 123 "a string" 1 '(+ 1 2) '(+ 1 (+ 1 2)))
+        (list 'name 123 "a string" 1 '(call + 1 2) '(call + 1 (call + 1 2)))
         do
         (with-tokenized text
           (should (equal (parser-parse-atom)
@@ -26,20 +26,20 @@
                      (parser-parse-atom)))))
   (with-tokenized "123**2"
     (should (equal (parser-parse-power)
-                   '(** 123 2))))
+                   '(call ** 123 2))))
   (with-tokenized "123**2**3"
     (should (equal (parser-parse-power)
-                   '(** 123 (** 2 3))))))
+                   '(call ** 123 (call ** 2 3))))))
 
 (ert-deftest parser-test-factor ()
   (with-tokenized "123"
     (should (equal 123
                    (parser-parse-factor))))
   (with-tokenized "-123"
-    (should (equal '(- 123)
+    (should (equal '(call - 123)
                    (parser-parse-factor))))
   (with-tokenized "+123"
-    (should (equal '(+ 123)
+    (should (equal '(call + 123)
                    (parser-parse-factor)))))
 
 (ert-deftest parser-test-term ()
@@ -47,16 +47,16 @@
     (should (equal 123
                    (parser-parse-term))))
   (with-tokenized "123 * 456"
-    (should (equal '(* 123 456)
+    (should (equal '(call * 123 456)
                    (parser-parse-term))))
   (with-tokenized "123 / 456"
-    (should (equal '(/ 123 456)
+    (should (equal '(call / 123 456)
                    (parser-parse-term))))
   (with-tokenized "123 % 456"
-    (should (equal '(% 123 456)
+    (should (equal '(call % 123 456)
                    (parser-parse-term))))
   (with-tokenized "123 % 456 / 5"
-    (should (equal '(/ (% 123 456) 5)
+    (should (equal '(call / (call % 123 456) 5)
                    (parser-parse-term)))))
 
 (ert-deftest parser-test-expr ()
@@ -64,10 +64,10 @@
     (should (equal 123
                    (parser-parse-expr))))
   (with-tokenized "123 + 456"
-    (should (equal '(+ 123 456)
+    (should (equal '(call + 123 456)
                    (parser-parse-expr))))
   (with-tokenized "123 - 456"
-    (should (equal '(- 123 456)
+    (should (equal '(call - 123 456)
                    (parser-parse-expr)))))
 
 (ert-deftest parser-test-comp-op ()
@@ -81,10 +81,10 @@
     (should (equal '1
                    (parser-parse-comparison))))
   (with-tokenized "1 < 2"
-    (should (equal '(< 1 2)
+    (should (equal '(call < 1 2)
                    (parser-parse-comparison))))
   (with-tokenized "1 < 2 < 3"
-    (should (equal '(< (< 1 2) 3)
+    (should (equal '(call < (call < 1 2) 3)
                    (parser-parse-comparison)))))
 
 (ert-deftest parser-test-not-test ()
@@ -92,7 +92,7 @@
     (should (equal 2
                    (parser-parse-not-test))))
   (with-tokenized "not 2"
-    (should (equal '(not 2)
+    (should (equal '(call not 2)
                    (parser-parse-not-test)))))
 
 (ert-deftest parser-test-and-test ()
@@ -100,7 +100,7 @@
     (should (equal 2
                    (parser-parse-and-test))))
   (with-tokenized "2 and 3"
-    (should (equal '(and 2 3)
+    (should (equal '(call and 2 3)
                    (parser-parse-and-test)))))
 
 (ert-deftest parser-test-test ()
@@ -108,10 +108,10 @@
     (should (equal 2
                    (parser-parse-and-test))))
   (with-tokenized "2 or 3"
-    (should (equal '(or 2 3)
+    (should (equal '(call or 2 3)
                    (parser-parse-test))))
   (with-tokenized "2 and 3"
-    (should (equal '(and 2 3)
+    (should (equal '(call and 2 3)
                    (parser-parse-test)))))
 
 (ert-deftest parser-test-exprlist ()
@@ -121,7 +121,7 @@
 
 (ert-deftest parser-test-testlist ()
   (with-tokenized "v + 2"
-    (should (equal '(+ v 2)
+    (should (equal '(call + v 2)
                    (parser-parse-testlist))))
   (with-tokenized "1,2,3"
     (should (equal '(1 2 3)
@@ -129,10 +129,10 @@
 
 (ert-deftest parser-test-expr-stmt ()
   (with-tokenized "v + 2"
-    (should (equal '(+ v 2)
+    (should (equal '(call + v 2)
                    (parser-parse-expr-stmt))))
   (with-tokenized "v + 2 = a + 3"
-    (should (equal '(assign (+ v 2) (+ a 3))
+    (should (equal '(assign (call + v 2) (call + a 3))
                    (parser-parse-expr-stmt)))))
 
 (ert-deftest parser-test-flow-stmt ()
@@ -154,7 +154,7 @@
     (should (equal '(return 1)
                    (parser-parse-return-stmt))))
   (with-tokenized "return 1 + 2"
-    (should (equal '(return (+ 1 2))
+    (should (equal '(return (call + 1 2))
                    (parser-parse-return-stmt)))))
 
 (ert-deftest parser-test-assert-stmt ()
@@ -173,7 +173,7 @@
     (should (equal 'continue
                    (parser-parse-small-stmt))))
   (with-tokenized "a + b"
-    (should (equal '(+ a b)
+    (should (equal '(call + a b)
                    (parser-parse-small-stmt)))))
 
 (ert-deftest parser-test-simple-stmt ()
@@ -181,7 +181,7 @@
     (should (equal '(progn 1 2 3)
                    (parser-parse-simple-stmt))))
   (with-tokenized "a + b"
-    (should (equal '(+ a b)
+    (should (equal '(call + a b)
                    (parser-parse-simple-stmt)))))
 
 (ert-deftest parser-test-suite ()
@@ -201,12 +201,12 @@
                    (parser-parse-while))))
   (with-tokenized "while True: \n   a = 1 + 2\n"
     (should (equal '(while True
-                      (progn (assign a (+ 1 2))))
+                      (progn (assign a (call + 1 2))))
                    (parser-parse-while))))
   (with-tokenized "while True: \n a = 1 + 2\n b = 3"
     (should (equal '(while True
                       (progn
-                        (assign a (+ 1 2))
+                        (assign a (call + 1 2))
                         (assign b 3)))
                    (parser-parse-while)))))
 

@@ -36,7 +36,7 @@
          (res atom))
     (while (token-is-p 'DOUBLESTAR)
       (token-pop)
-      (setq res (list (intern "**") res (parse-factor))))
+      (setq res (list 'call (intern "**") res (parse-factor))))
     res))
 
 (defun parse-factor ()
@@ -44,7 +44,7 @@
     (cond
      ((token-one-of-p '(MINUS PLUS))
       (token-pop)
-      (list (intern token-value) (parse-factor)))
+      (list 'call (intern token-value) (parse-factor)))
      (t
       (parse-power)))))
 
@@ -54,7 +54,7 @@
     (while (token-one-of-p '(STAR SLASH PERCENT))
       (let ((token-value (second (first token-stream))))
         (token-pop)
-        (setq res (list (intern token-value) res (parse-factor)))))
+        (setq res (list 'call (intern token-value) res (parse-factor)))))
     res))
 
 (defun parse-expr ()
@@ -63,7 +63,7 @@
     (while (token-one-of-p '(PLUS MINUS))
       (let ((token-value (second (first token-stream))))
         (token-pop)
-        (setq res (list (intern token-value) res (parse-term)))))
+        (setq res (list 'call (intern token-value) res (parse-term)))))
     res))
 
 (defconst comp-ops '(LESS GREATER EQEQUAL GREATEREQUAL LESSEQUAL NOTEQUAL))
@@ -76,13 +76,13 @@
 (defun parse-comparison ()
   (let ((expr (parse-expr)))
     (while (token-one-of-p comp-ops)
-      (setq expr (list (parse-comp-op) expr (parse-expr))))
+      (setq expr (list 'call (parse-comp-op) expr (parse-expr))))
     expr))
 
 (defun parse-not-test ()
   (cond ((token-is-keyword-p '("not"))
          (token-pop)
-         (list 'not (parse-not-test)))
+         (list 'call 'not (parse-not-test)))
         (t (parse-comparison))))
 
 (defun parse-and-test ()
@@ -90,7 +90,7 @@
          (res not-test))
     (while (token-is-keyword-p '("and"))
       (token-pop)
-      (setq res (list 'and res (parse-not-test))))
+      (setq res (list 'call 'and res (parse-not-test))))
     res))
 
 (defun parse-test ()
@@ -98,7 +98,7 @@
          (res test))
     (while (token-is-keyword-p '("or"))
       (token-pop)
-      (setq res (list 'or res (parse-and-test))))
+      (setq res (list 'call 'or res (parse-and-test))))
     res))
 
 (defun parse-exprlist ()

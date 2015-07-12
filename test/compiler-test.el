@@ -6,6 +6,26 @@
 (require 'parser)
 (require 'tokenizer)
 
+(ert-deftest compiler-test-compile-funcall-synonym ()
+  (with-compiled-single "1 == 2"
+    (should (equal '((byte-constant . 0)
+                     (byte-constant . 1)
+                     (byte-constant . 2)
+                     (byte-call . 2))
+                   codes))
+    (should (equal [compiler-synonym-== 1 2]
+                   constants))
+    (should (equal 3 depth)))
+  (with-compiled-single "1 != 2"
+    (should (equal '((byte-constant . 0)
+                     (byte-constant . 1)
+                     (byte-constant . 2)
+                     (byte-call . 2))
+                   codes))
+    (should (equal [compiler-synonym-!= 1 2]
+                   constants))
+    (should (equal 3 depth))))
+
 (ert-deftest compiler-test-const-expr-to-lap ()
   (with-compiled-single "1"
     (should (equal '((byte-constant . 0))
@@ -147,6 +167,40 @@
     (should (equal [a a]
                    constants))
     (should (equal 1 depth))))
+
+(ert-deftest compiler-test-or-to-lap ()
+  (with-compiled-single "a or b"
+    (should (equal '((byte-varref . 0)
+                     (byte-goto-if-not-nil . (TAG 1))
+                     (byte-varref . 1)
+                     (byte-goto-if-not-nil . (TAG 1))
+                     (byte-constant . 2) ;; fail
+                     (byte-goto . (TAG 2))
+                     (TAG 1) ;; success
+                     (byte-constant . 3)
+                     (TAG 2) ;; done
+                     )
+                   codes))
+    (should (equal [a b nil t]
+                   constants))
+    (should (equal 2 depth))))
+
+(ert-deftest compiler-test-and-to-lap ()
+  (with-compiled-single "a and b"
+    (should (equal '((byte-varref . 0)
+                     (byte-goto-if-nil . (TAG 1))
+                     (byte-varref . 1)
+                     (byte-goto-if-nil . (TAG 1))
+                     (byte-constant . 2) ;; sucess
+                     (byte-goto . (TAG 2))
+                     (TAG 1) ;; fail
+                     (byte-constant . 3)
+                     (TAG 2) ;; done
+                     )
+                   codes))
+    (should (equal [a b t nil]
+                   constants))
+    (should (equal 2 depth))))
 
 (ert-deftest compiler-test-return-to-lap ()
   ;; plain return should just return nil

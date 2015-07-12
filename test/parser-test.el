@@ -100,7 +100,7 @@
     (should (equal 2
                    (parser-parse-and-test))))
   (with-tokenized "2 and 3"
-    (should (equal '(call and 2 3)
+    (should (equal '(and 2 3)
                    (parser-parse-and-test)))))
 
 (ert-deftest parser-test-test ()
@@ -108,10 +108,10 @@
     (should (equal 2
                    (parser-parse-and-test))))
   (with-tokenized "2 or 3"
-    (should (equal '(call or 2 3)
+    (should (equal '(or 2 3)
                    (parser-parse-test))))
   (with-tokenized "2 and 3"
-    (should (equal '(call and 2 3)
+    (should (equal '(and 2 3)
                    (parser-parse-test)))))
 
 (ert-deftest parser-test-exprlist ()

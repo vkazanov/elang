@@ -90,7 +90,7 @@
          (res not-test))
     (while (token-is-keyword-p '("and"))
       (token-pop)
-      (setq res (list 'call 'and res (parse-not-test))))
+      (setq res (list 'and res (parse-not-test))))
     res))
 
 (defun parse-test ()
@@ -98,7 +98,7 @@
          (res test))
     (while (token-is-keyword-p '("or"))
       (token-pop)
-      (setq res (list 'call 'or res (parse-and-test))))
+      (setq res (list 'or res (parse-and-test))))
     res))
 
 (defun parse-exprlist ()

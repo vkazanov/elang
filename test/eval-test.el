@@ -17,6 +17,24 @@
   (should (equal (compile-and-run "return 2*(2 + 3)")
                  10)))
 
+(ert-deftest eval-test-equal ()
+  (should (equal (compile-and-run "return 1 == 1")
+                 t))
+  (should (equal (compile-and-run "return 1 != 1")
+                 nil)))
+
+(ert-deftest eval-test-or ()
+  (should (equal (compile-and-run "return 1 == 1 or 2 == 2")
+                 t))
+  (should (equal (compile-and-run "return 1 == 2 or 2 == 3")
+                 nil)))
+
+(ert-deftest eval-test-and ()
+  (should (equal (compile-and-run "return 1 == 1 and 2 == 2")
+                 t))
+  (should (equal (compile-and-run "return 1 == 1 and 2 == 3")
+                 nil)))
+
 (ert-deftest eval-test-assign ()
   (should (equal (compile-and-run "x = 1\nreturn x")
                  1))

@@ -8,6 +8,15 @@
 
 (define-namespace compiler-
 
+(defconst synonyms '((== . compiler-synonym-==)
+                     (!= . compiler-synonym-!=)))
+
+(defun synonym-== (left right)
+  (equal left right))
+
+(defun synonym-!= (left right)
+  (not (equal left right)))
+
 (defun compile-to-lapcode (parse-tree &optional file-input)
   (let (codes                           ; codes emitted
         constants                       ; constants vector
@@ -52,17 +61,48 @@
                            ('progn (compile-progn tree))
                            ('while (compile-while tree))
                            ('return (compile-return tree))
-                           ('call (compile-funcall tree))))
+                           ('call (compile-funcall tree))
+                           ('or (compile-or tree))
+                           ('and (compile-and tree))))
                         (t (error "Cannot compile") )))
          ;; Compile a usual function call
          (compile-funcall (tree)
                           (let* ((tree (rest tree))
                                  (sym (first tree))
-                                 (args (rest tree)))
+                                 (args (rest tree))
+                                 (synonym (assq sym synonyms)))
                             (emit-code 'byte-constant (length constants))
-                            (add-constant sym)
+                            (add-constant (if synonym (cdr synonym) sym))
                             (mapc #'compile-expr args)
                             (emit-code 'byte-call (length args))))
+         ;; Compile the or form
+         (compile-or (tree)
+                     (let ((successtag (make-tag))
+                           (donetag (make-tag)))
+                       (dolist (test (rest tree))
+                         (compile-expr test)
+                         (emit-code 'byte-goto-if-not-nil successtag))
+                       (emit-code 'byte-constant (length constants))
+                       (add-constant nil)
+                       (emit-code 'byte-goto donetag)
+                       (emit-tag successtag)
+                       (emit-code 'byte-constant (length constants))
+                       (add-constant t)
+                       (emit-tag donetag)))
+         ;; Compile the and form
+         (compile-and (tree)
+                      (let ((failtag (make-tag))
+                            (donetag (make-tag)))
+                        (dolist (test (rest tree))
+                          (compile-expr test)
+                          (emit-code 'byte-goto-if-nil failtag))
+                        (emit-code 'byte-constant (length constants))
+                        (add-constant t)
+                        (emit-code 'byte-goto donetag)
+                        (emit-tag failtag)
+                        (emit-code 'byte-constant (length constants))
+                        (add-constant nil)
+                        (emit-tag donetag)))
          ;; Compile the if/then form
          (compile-if (tree)
                      (let ((testexpr (second tree))
@@ -141,6 +181,7 @@
         (unbind-all)
         (emit-code 'byte-return))
       (values (reverse codes) (vconcat (reverse constants)) maxdepth))))
+
 
 ) ;;; end of compiler- namespace
 

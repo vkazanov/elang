@@ -74,3 +74,10 @@
                  1))
   (should (equal (compile-and-run "a = 2\nif a > 1: return a + 1\nreturn 1")
                  3)))
+
+(ert-deftest eval-test-funcall ()
+  (cl-flet ((testfun () 1))
+    (should (equal (compile-and-run "return testfun()")
+                   1))
+    ;; TODO: name mangling test
+    ))

@@ -31,6 +31,7 @@
       (read value))
      (t (throw 'parser-error (format "Unexpected token: %s instead of atom" type))))))
 
+;;; TODO: add trailer and use it to build funcalls
 (defun parse-power ()
   (let* ((atom (parse-atom))
          (res atom))

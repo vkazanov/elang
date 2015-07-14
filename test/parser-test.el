@@ -291,3 +291,8 @@
   (with-tokenized "\n\ns1\ns2\n\n"
     (should (equal '(progn s1 s2)
                    (parser-parse-file-input)))))
+
+(ert-deftest parser-test-funcall ()
+  (with-tokenized "fun()"
+    (should (equal '(call fun)
+                   (parser-parse-file-input)))))

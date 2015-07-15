@@ -35,6 +35,8 @@
 (defun parse-power ()
   (let* ((atom (parse-atom))
          (res atom))
+    (while (token-is-p 'LPAR)
+      (setq res `(call ,res ,@(parse-trailer))))
     (while (token-is-p 'DOUBLESTAR)
       (token-pop)
       (setq res (list 'call (intern "**") res (parse-factor))))

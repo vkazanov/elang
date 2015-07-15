@@ -29,7 +29,13 @@
                    '(call ** 123 2))))
   (with-tokenized "123**2**3"
     (should (equal (parser-parse-power)
-                   '(call ** 123 (call ** 2 3))))))
+                   '(call ** 123 (call ** 2 3)))))
+  (with-tokenized "fun()"
+    (should (equal '(call fun)
+                   (parser-parse-power))))
+  (with-tokenized "fun(1,2)"
+    (should (equal '(call fun 1 2)
+                   (parser-parse-power)))))
 
 (ert-deftest parser-test-trailer ()
   (with-tokenized "()"
@@ -301,9 +307,4 @@
                    (parser-parse-file-input))))
   (with-tokenized "\n\ns1\ns2\n\n"
     (should (equal '(progn s1 s2)
-                   (parser-parse-file-input)))))
-
-(ert-deftest parser-test-funcall ()
-  (with-tokenized "fun()"
-    (should (equal '(call fun)
                    (parser-parse-file-input)))))

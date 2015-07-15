@@ -76,8 +76,13 @@
                  3)))
 
 (ert-deftest eval-test-funcall ()
-  (cl-flet ((testfun () 1))
-    (should (equal (compile-and-run "return testfun()")
-                   1))
-    ;; TODO: name mangling test
-    ))
+  (fset 'testfun #'(lambda () 1))
+  (should (equal (compile-and-run "return testfun()")
+                 1))
+  (fset 'testfun #'(lambda (arg) arg))
+  (should (equal (compile-and-run "return testfun(2)")
+                 2))
+  (fset 'testfun #'(lambda (arg1 arg2) (+ arg1 arg2)))
+  (should (equal (compile-and-run "return testfun(1+2, 2)")
+                 5))
+  (fset 'testfun nil))

@@ -31,6 +31,17 @@
     (should (equal (parser-parse-power)
                    '(call ** 123 (call ** 2 3))))))
 
+(ert-deftest parser-test-trailer ()
+  (with-tokenized "()"
+    (should (equal (parser-parse-trailer)
+                   '())))
+  (with-tokenized "(1)"
+    (should (equal (parser-parse-trailer)
+                   '(1))))
+  (with-tokenized "(1, 2, 3)"
+    (should (equal (parser-parse-trailer)
+                   '(1 2 3)))))
+
 (ert-deftest parser-test-factor ()
   (with-tokenized "123"
     (should (equal 123

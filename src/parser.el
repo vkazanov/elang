@@ -40,6 +40,17 @@
       (setq res (list 'call (intern "**") res (parse-factor))))
     res))
 
+(defun parse-trailer ()
+  (token-pop-or-fail 'LPAR)
+  (let (res)
+    (when (or (token-one-of-p testlist-type-firstset)
+              (token-is-keyword-p testlist-val-firstset))
+      (setq res (parse-testlist)))
+    (token-pop-or-fail 'RPAR)
+    ;; TODO: ugly
+    (if (listp res) res
+      (list res))))
+
 (defun parse-factor ()
   (let ((token-value (second (first token-stream))))
     (cond

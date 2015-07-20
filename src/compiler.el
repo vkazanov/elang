@@ -51,14 +51,15 @@
                            (with-temp-buffer
                              (insert sname)
                              (goto-char (point-min))
-                             (replace-string "_" "-")
+                             (while (search-forward "_" nil t)
+                               (replace-match "-" nil t))
                              (intern (buffer-string)))))
          ;; Compile an expression (main compilation entry point)
          (compile-expr (tree)
                        (cond
                         ((symbolp tree)
                          (emit-code 'byte-varref (length constants))
-                         (add-constant tree))
+                         (add-constant (name-translate tree)))
                         ((numberp tree)
                          (emit-code 'byte-constant (length constants))
                          (add-constant tree))

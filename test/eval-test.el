@@ -92,3 +92,9 @@
   (should (equal (compile-and-run "return test_fun(1, 2)")
                  3))
   (fset 'test-fun nil))
+
+(ert-deftest eval-test-var-name-translate ()
+  (setq test-var 10)
+  (should (equal (compile-and-run "return test_var")
+                 10))
+  (unintern 'test-var))

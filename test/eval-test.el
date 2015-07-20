@@ -86,3 +86,9 @@
   (should (equal (compile-and-run "return testfun(1+2, 2)")
                  5))
   (fset 'testfun nil))
+
+(ert-deftest eval-test-funcall-name-translate ()
+  (fset 'test-fun #'(lambda (arg1 arg2) (+ arg1 arg2)))
+  (should (equal (compile-and-run "return test_fun(1, 2)")
+                 3))
+  (fset 'test-fun nil))

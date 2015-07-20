@@ -45,6 +45,14 @@
          (unbind-all ()
                      (when binds
                        (emit-code 'byte-unbind (length binds))))
+         ;; translate a Python-style name into an elisp one
+         (name-translate (symbol)
+                         (let ((sname (symbol-name symbol)))
+                           (with-temp-buffer
+                             (insert sname)
+                             (goto-char (point-min))
+                             (replace-string "_" "-")
+                             (intern (buffer-string)))))
          ;; Compile an expression (main compilation entry point)
          (compile-expr (tree)
                        (cond
@@ -72,7 +80,8 @@
                                  (args (rest tree))
                                  (synonym (assq sym synonyms)))
                             (emit-code 'byte-constant (length constants))
-                            (add-constant (if synonym (cdr synonym) sym))
+                            (add-constant (if synonym (cdr synonym)
+                                            (name-translate sym)))
                             (mapc #'compile-expr args)
                             (emit-code 'byte-call (length args))))
          ;; Compile the or form

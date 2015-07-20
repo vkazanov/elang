@@ -36,17 +36,17 @@
      (dbind (codes constants depth) (compiler-compile-to-lapcode parse-tree t)
        ,@body)))
 
-(defun compile-and-run (str)
-  (let (parse-tree)
-    (with-tokenized str
-      (setq parse-tree (parser-parse-file-input))
+(defun compile-to-function (bodystr arglist)
+  (with-tokenized bodystr
+    (let ((parse-tree (parser-parse-file-input)))
       (dbind (lapcode constants depth) (compiler-compile-to-lapcode parse-tree)
-        ;; (message "CODE: %s" str)
-        ;; (message "BYTECODE: %s" lapcode)
-        ;; (message "CONSTANTS: %s" constants)
-        (let ((fun (make-byte-code
-                    nil
-                    (byte-compile-lapcode lapcode)
-                    constants
-                    depth)))
-          (funcall fun))))))
+        (make-byte-code
+         arglist
+         (byte-compile-lapcode lapcode)
+         constants
+         depth)))))
+
+(defun compile-and-run (bodystr &optional arglist args)
+  (let ((fun (compile-to-function bodystr arglist)))
+    (if (not arglist) (funcall fun)
+      (funcall fun args))))

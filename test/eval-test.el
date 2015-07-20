@@ -98,3 +98,9 @@
   (should (equal (compile-and-run "return test_var")
                  10))
   (unintern 'test-var))
+
+(ert-deftest eval-test-arg-passing ()
+  (fset 'testfun (compile-to-function "return concat(a, b)" '(a b)))
+  (should (equal (testfun "one" "two")
+                 "onetwo"))
+  (fset 'testfun nil))

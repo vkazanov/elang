@@ -4,6 +4,9 @@
 
 (require 'tokenizer)
 (require 'parser)
+(require 'compiler)
+(require 'evaluator)
+
 
 (defmacro with-tokenized (str &rest body)
   (declare (indent 1))

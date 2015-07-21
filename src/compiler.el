@@ -180,7 +180,11 @@
                              (add-constant nil)
                              (emit-code 'byte-constant (1- (length constants))))
                            (unbind-all)
-                           (emit-code 'byte-return))))
+                           (emit-code 'byte-return)))
+         ;; Compile a *local* function definition
+         (compile-defun (tree)
+                        (throw 'compiler-error (format "Local functions are not implemented yet")))
+         )
       (compile-expr parse-tree)
       ;; Check if the return is implicit (i.e., when the final bytecode is not a return).
       ;; This only works for file-input

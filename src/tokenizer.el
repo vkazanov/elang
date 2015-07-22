@@ -23,7 +23,7 @@
     (cl-flet ((yield (elem) (push elem tokens)))
       (with-temp-buffer
         (insert text)
-        (goto-char beg)
+        (goto-char (point-min))
         (generate-tokens #'yield)))))
 
 ;;; Token regexes and regex-related helper functions

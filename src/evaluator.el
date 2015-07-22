@@ -23,20 +23,44 @@
       (or (python-nav-end-of-defun)
           (end-of-line 1))
       (setq max (point))
-      (setq defunstr (buffer-substring-no-properties min max))
-      (message defunstr)
-      ;; TODO: use defun parser
-      )))
-
-(defun eval-region (min max)
-  (interactive "r")
-  (let ((regionstr (buffer-substring-no-properties min max)))
-    ;; TODO: parse and walk
-    (message regionstr)))
+      (eval-region min max))))
 
 (defun eval-buffer ()
   (interactive)
   (eval-region (point-min) (point-max)))
+
+(defun eval-region (min max)
+  (interactive "r")
+  (let ((regionstr (buffer-substring-no-properties min max)))
+    (with-parsed regionstr
+      (let ((toplevelforms (rest parse-tree)))
+        (dolist (form toplevelforms)
+          (when (eq (first form) 'defun)
+            (destructuring-bind (type name arglist body) form
+              (fset (intern name) (evaluator-make-function body arglist)))))))))
+
+(defun make-function (parse-tree arglist)
+  (destructuring-bind (lapcode constants depth) (compiler-compile-to-lapcode parse-tree)
+    (make-byte-code
+     arglist
+     (byte-compile-lapcode lapcode)
+     constants
+     depth)))
+
+(defmacro with-parsed (str &rest body)
+  (declare (indent 1))
+  `(let (parse-tree)
+     (with-tokenized ,str
+       (setq parse-tree (parser-parse-file-input)))
+     ,@body))
+
+(defmacro with-tokenized (str &rest body)
+  (declare (indent 1))
+  `(with-temp-buffer
+     (insert ,str)
+     (let* ((tokens (reverse (tokenizer-tokenize-region))))
+       (setq-local parser-token-stream tokens)
+       ,@body)))
 
 ) ;;; end of evaluator- namespace
 

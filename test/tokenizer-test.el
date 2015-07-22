@@ -17,21 +17,21 @@
   (loop for operator-str in tokenizer-test-operator-str-list
         for operator-token in tokenizer-test-operator-token-list
         do
-        (with-tokenized operator-str
+        (evaluator-with-tokenized operator-str
           (let ((token (first tokens)))
             (should (eq operator-token (first token)))
             (should (equal operator-str (second token)))))))
 
 (ert-deftest tokenizer-test-strings ()
-  (with-tokenized "\"a simple string\""
+  (evaluator-with-tokenized "\"a simple string\""
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
       (should (equal "\"a simple string\"" (second token)))))
-  (with-tokenized "\"\"\"triple string\"\"\""
+  (evaluator-with-tokenized "\"\"\"triple string\"\"\""
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
       (should (equal "\"\"\"triple string\"\"\"" (second token)))))
-  (with-tokenized "'single'"
+  (evaluator-with-tokenized "'single'"
     (let ((token (first tokens)))
       (should (eq 'STRING (first token)))
       (should (equal "'single'" (second token))))))

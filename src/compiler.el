@@ -26,6 +26,7 @@
         constants                       ; constants vector
         (tag-counter 0)                 ; current tag number
         binds                           ; bound var alist
+        globals                         ; global vars alist
         (depth 0)                       ; current stack depth
         (maxdepth 0)                    ; max stack depth
         )
@@ -76,7 +77,8 @@
                            ('return (compile-return tree))
                            ('call (compile-funcall tree))
                            ('or (compile-or tree))
-                           ('and (compile-and tree))))
+                           ('and (compile-and tree))
+                           ('global (compile-global tree))))
                         (t (error "Cannot compile") )))
          ;; Compile a usual function call
          (compile-funcall (tree)
@@ -143,26 +145,32 @@
          (compile-progn (tree)
                         (let ((forms (rest tree)))
                           (while forms
-                            (compile-expr (pop forms))
-                            ;; TODO: dirty, move into compile expr as exprs
-                            ;; know, whether it is needed
-                            (unless (memq (caar codes) '(byte-return
-                                                         byte-varbind
-                                                         byte-varset))
-                              (emit-code 'byte-discard)))))
+                            (let ((form (pop forms)))
+                              (compile-expr form)
+                              ;; TODO: dirty, move into compile expr as exprs
+                              ;; know, whether it is needed to discard the value
+                              (unless (or (memq (caar codes) '(byte-return
+                                                               byte-varbind
+                                                               byte-varset))
+                                          (and (listp form)
+                                               (memq (first form) '(global))))
+                                (emit-code 'byte-discard))))))
          ;; Compile an assignment
          (compile-assign (tree)
                          (let ((lvalue (second tree))
                                (rvalue (third tree)))
                            (compile-expr rvalue)
                            (let ((bind (assq lvalue binds))
+                                 (global (assq lvalue globals))
                                  (constidx (length constants)))
-                             (cond ((not bind)
+                             (cond (global
+                                    (emit-code 'byte-varset (cdr global)))
+                                   (bind
+                                    (emit-code 'byte-varset (cdr bind)))
+                                   (t
                                     (add-constant lvalue)
                                     (emit-code 'byte-varbind constidx)
-                                    (add-bind lvalue constidx))
-                                   (t
-                                    (emit-code 'byte-varset (cdr bind)))))))
+                                    (add-bind lvalue constidx))))))
          ;; Compile a while loop
          (compile-while (tree)
                         (let ((testexpr (second tree))
@@ -185,9 +193,15 @@
                              (emit-code 'byte-constant (1- (length constants))))
                            (unbind-all)
                            (emit-code 'byte-return)))
+         ;; Compile a global declaration
+         (compile-global (tree)
+                         (dolist (global (second tree))
+                           (let ((constidx (length constants)))
+                             (add-constant global)
+                             (push (cons global constidx) globals))))
          ;; Compile a *local* function definition
          (compile-defun (tree)
-                        (throw 'compiler-error (format "Local functions are not implemented yet")))
+                        (throw 'compiler-error "Local functions are not implemented yet"))
          )
       (compile-expr parse-tree)
       ;; Check if the return is implicit (i.e., when the final bytecode is not a return).

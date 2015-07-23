@@ -150,6 +150,15 @@
     (should (equal [1 x 2 y]
                    constants))
     (should (equal 1 depth)))
+  (with-compiled-single "global z; z = 1;y = 2"
+    (should (equal '((byte-constant . 1)
+                     (byte-varset . 0)
+                     (byte-constant . 2)
+                     (byte-varbind . 3))
+                   codes))
+    (should (equal [z 1 2 y]
+                   constants))
+    (should (equal 1 depth)))
   ;; TODO: 2 assignments as x, y = 1, 2
   )
 

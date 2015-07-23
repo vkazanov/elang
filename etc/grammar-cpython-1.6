@@ -12,11 +12,12 @@ varargslist: NAME (',' NAME )*
 
 stmt: simple_stmt | compound_stmt
 simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
-small_stmt: expr_stmt |  flow_stmt | assert_stmt | 'pass'
+small_stmt: expr_stmt |  flow_stmt | assert_stmt | global_stmt | 'pass'
 expr_stmt: testlist [('=' testlist)]
 # For assignments, additional restrictions enforced by the interpreter
 flow_stmt: 'break' | 'continue' | return_stmt
 return_stmt: 'return' [testlist]
+global_stmt: 'global' NAME (',' NAME)*
 assert_stmt: 'assert' test
 
 compound_stmt: if_stmt | while_stmt | funcdef

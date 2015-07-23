@@ -185,9 +185,20 @@
     (should (equal '(assert 12)
                    (parser-parse-assert-stmt)))))
 
+(ert-deftest parser-test-global-stmt ()
+  (evaluator-with-tokenized "global x"
+    (should (equal '(global (x))
+                   (parser-parse-global-stmt))))
+  (evaluator-with-tokenized "global x, y"
+    (should (equal '(global (x y))
+                   (parser-parse-global-stmt)))))
+
 (ert-deftest parser-test-small-stmt ()
   (evaluator-with-tokenized "assert 12"
     (should (equal '(assert 12)
+                   (parser-parse-small-stmt))))
+  (evaluator-with-tokenized "global x"
+    (should (equal '(global (x))
                    (parser-parse-small-stmt))))
   (evaluator-with-tokenized "pass"
     (should (equal nil
@@ -200,6 +211,9 @@
                    (parser-parse-small-stmt)))))
 
 (ert-deftest parser-test-simple-stmt ()
+  (evaluator-with-tokenized "global x"
+    (should (equal '(global (x))
+                   (parser-parse-small-stmt))))
   (evaluator-with-tokenized "1;2;3"
     (should (equal '(progn 1 2 3)
                    (parser-parse-simple-stmt))))

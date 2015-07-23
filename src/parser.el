@@ -163,14 +163,25 @@
   (token-pop-or-fail 'KEYWORD '("assert"))
   (list 'assert (parse-test)))
 
+(defun parse-global-stmt ()
+  (token-pop-or-fail 'KEYWORD '("global"))
+  (let (res)
+    (push (parse-test) res)
+    (while (token-is-p 'COMMA)
+      (token-pop)
+      (push (parse-test) res))
+    (list 'global (reverse res))))
+
 (defconst small-type-firstset '(STRING NUMBER NAME MINUS LPAR PLUS))
-(defconst small-val-firstset '("return" "assert" "not" "pass" "break" "continue"))
+(defconst small-val-firstset '("return" "assert" "not" "pass" "break" "continue" "global"))
 (defun parse-small-stmt ()
   (cond
    ((token-is-keyword-p flow-val-firstset)
     (parse-flow-stmt))
    ((token-is-keyword-p '("assert"))
     (parse-assert-stmt))
+   ((token-is-keyword-p '("global"))
+    (parse-global-stmt))
    ((token-is-keyword-p '("pass"))
     (token-pop)
     nil)
@@ -180,7 +191,7 @@
    (t (throw 'parser-error (format "Unexpected token: %s" (car token-stream))))))
 
 (defconst simple-type-firstset '(STRING NUMBER NAME MINUS LPAR PLUS))
-(defconst simple-val-firstset '("return" "assert" "not" "pass" "break" "continue"))
+(defconst simple-val-firstset '("return" "assert" "not" "pass" "break" "continue" "global"))
 (defun parse-simple-stmt ()
   (let ((small-stmts (list (parse-small-stmt))))
     (when (token-is-p 'SEMI)
@@ -281,7 +292,7 @@
 
 (defconst stmt-type-firstset '(NAME STRING NUMBER MINUS LPAR PLUS))
 (defconst stmt-val-firstset
-  '("return" "assert" "if" "not" "pass" "def" "break" "continue" "while"))
+  '("return" "assert" "global" "if" "not" "pass" "def" "break" "continue" "while"))
 (defun parse-stmt ()
   (cond
    ((token-is-keyword-p compound-stmt-val-firstset)

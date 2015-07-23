@@ -33,26 +33,8 @@
   (interactive "r")
   (let ((regionstr (buffer-substring-no-properties min max)))
     (with-parsed regionstr
-      (let ((toplevelforms (rest parse-tree)))
-        (dolist (form toplevelforms)
-          (when (eq (first form) 'defun)
-            (destructuring-bind (type name arglist body) form
-              (fset (intern name) (evaluator-make-function body arglist)))))))))
-
-(defun make-function (parse-tree arglist)
-  (destructuring-bind (lapcode constants depth) (compiler-compile-to-lapcode parse-tree)
-    (make-byte-code
-     arglist
-     (byte-compile-lapcode lapcode)
-     constants
-     depth)))
-
-(defmacro with-parsed (str &rest body)
-  (declare (indent 1))
-  `(let (parse-tree)
-     (with-tokenized ,str
-       (setq parse-tree (parser-parse-file-input)))
-     ,@body))
+                 (dolist (form (rest parse-tree))
+                   (evaluator-eval-toplevel form)))))
 
 (defmacro with-tokenized (str &rest body)
   (declare (indent 1))
@@ -62,6 +44,30 @@
        (setq-local parser-token-stream tokens)
        ,@body)))
 
-) ;;; end of evaluator- namespace
+(defmacro with-parsed (str &rest body)
+  (declare (indent 1))
+  `(let (parse-tree)
+     (evaluator-with-tokenized ,str
+       (setq parse-tree (parser-parse-file-input)))
+     ,@body))
+
+(defun eval-toplevel (form)
+  (pcase form
+    (`(defun ,name ,arglist ,body)
+     (fset (intern name) (evaluator-make-function body arglist)))
+    (`(assign ,testlist-left ,testlist-right)
+     (set testlist-left testlist-right))
+    (_
+     (throw 'evaluator-error "Unknown toplevel form"))))
+
+(defun make-function (parse-tree arglist)
+  (destructuring-bind (lapcode constants depth) (compiler-compile-to-lapcode parse-tree t)
+    (make-byte-code
+     arglist
+     (byte-compile-lapcode lapcode)
+     constants
+     depth)))
+
+)   ;;; end of evaluator- namespace
 
 (provide 'evaluator)

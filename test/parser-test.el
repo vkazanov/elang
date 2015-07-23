@@ -33,8 +33,14 @@
   (evaluator-with-tokenized "fun()"
     (should (equal '(call fun)
                    (parser-parse-power))))
+  (evaluator-with-tokenized "fun(fun2(1))"
+    (should (equal '(call fun (call fun2 1))
+                   (parser-parse-power))))
   (evaluator-with-tokenized "fun(1,2)"
     (should (equal '(call fun 1 2)
+                   (parser-parse-power))))
+  (evaluator-with-tokenized "fun(fun2(1, 2),2)"
+    (should (equal '(call fun (call fun2 1 2) 2)
                    (parser-parse-power)))))
 
 (ert-deftest parser-test-trailer ()
@@ -138,7 +144,7 @@
 
 (ert-deftest parser-test-testlist ()
   (evaluator-with-tokenized "v + 2"
-    (should (equal '(call + v 2)
+    (should (equal '((call + v 2))
                    (parser-parse-testlist))))
   (evaluator-with-tokenized "1,2,3"
     (should (equal '(1 2 3)

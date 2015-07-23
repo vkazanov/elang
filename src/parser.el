@@ -19,7 +19,7 @@
       (token-pop)
       (let ((testlist (parse-testlist)))
         (token-pop-or-fail 'RPAR)
-        testlist))
+        (to-plain-list-if-single testlist)))
      ((eq type 'NAME)
       (token-pop)
       (intern value))
@@ -31,12 +31,13 @@
       (read value))
      (t (throw 'parser-error (format "Unexpected token: %s instead of atom" type))))))
 
-;;; TODO: add trailer and use it to build funcalls
 (defun parse-power ()
   (let* ((atom (parse-atom))
          (res atom))
     (while (token-is-p 'LPAR)
-      (setq res `(call ,res ,@(parse-trailer))))
+      (let* ((trailer (parse-trailer))
+             (trailer (if (listp trailer) trailer (list trailer))))
+        (setq res `(call ,res ,@trailer))))
     (while (token-is-p 'DOUBLESTAR)
       (token-pop)
       (setq res (list 'call (intern "**") res (parse-factor))))
@@ -49,9 +50,7 @@
               (token-is-keyword-p testlist-val-firstset))
       (setq res (parse-testlist)))
     (token-pop-or-fail 'RPAR)
-    ;; TODO: ugly
-    (if (listp res) res
-      (list res))))
+    res))
 
 (defun parse-factor ()
   (let ((token-value (second (first token-stream))))
@@ -129,9 +128,7 @@
     (while (token-is-p 'COMMA)
       (token-pop)
       (push (parse-test) testlist))
-    (if (length1-p testlist)
-        (car testlist)
-      (reverse testlist))))
+    (reverse testlist)))
 
 (defconst expr-type-firstset '(STRING NUMBER NAME MINUS PLUS RPAR))
 (defconst expr-val-firstset '("not"))
@@ -139,8 +136,10 @@
   (let ((testlist-left (parse-testlist)))
     (cond ((token-is-p 'EQUAL)
            (token-pop)
-           (list 'assign testlist-left (parse-testlist)))
-          (t testlist-left))))
+           (list 'assign
+                 (to-plain-list-if-single testlist-left)
+                 (to-plain-list-if-single (parse-testlist))))
+          (t (to-plain-list-if-single testlist-left)))))
 
 (defconst flow-val-firstset '("break" "continue" "return"))
 (defun parse-flow-stmt ()
@@ -157,7 +156,7 @@
   (token-pop-or-fail 'KEYWORD '("return"))
   (if (or (token-one-of-p testlist-type-firstset)
           (token-is-keyword-p testlist-val-firstset))
-      (list 'return (parse-testlist))
+      (list 'return (to-plain-list-if-single (parse-testlist)))
     (list 'return nil)))
 
 (defun parse-assert-stmt ()
@@ -349,6 +348,10 @@
 
 (defun length1-p (l)
   (= (length l) 1))
+
+(defun to-plain-list-if-single (l)
+  (if (length1-p l) (first l)
+    l))
 
 (defalias 'dbind 'destructuring-bind)
 

@@ -9,13 +9,17 @@
 (define-namespace compiler-
 
 (defconst synonyms '((== . compiler-synonym-==)
-                     (!= . compiler-synonym-!=)))
+                     (!= . compiler-synonym-!=)
+                     (** . compiler-synonym-**)))
 
 (defun synonym-== (left right)
   (equal left right))
 
 (defun synonym-!= (left right)
   (not (equal left right)))
+
+(defun synonym-** (left right)
+  (expt left right))
 
 (defun compile-to-lapcode (parse-tree &optional file-input)
   (let (codes                           ; codes emitted

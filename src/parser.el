@@ -147,7 +147,7 @@
          (token-value (second current-token)))
     (cond
      ((token-is-keyword-p '("continue"))
-      (intern token-value))
+      (parse-continue-stmt))
      ((token-is-keyword-p '("break"))
       (parse-break-stmt))
      ((token-is-keyword-p '("return"))
@@ -157,6 +157,10 @@
 (defun parse-break-stmt ()
   (token-pop-or-fail 'KEYWORD '("break"))
   (list 'break))
+
+(defun parse-continue-stmt ()
+  (token-pop-or-fail 'KEYWORD '("continue"))
+  (list 'continue))
 
 (defun parse-return-stmt ()
   (token-pop-or-fail 'KEYWORD '("return"))

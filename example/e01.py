@@ -22,3 +22,12 @@ def test5():
 		while 11:
 			break
 		break
+
+# a simple while loop (using a continue)
+def test6():
+	a = 1
+	while 10:
+		a = a + 1
+		if a < 10: continue
+		break
+	return a

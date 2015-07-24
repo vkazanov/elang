@@ -77,6 +77,7 @@
                            ('progn (compile-progn tree))
                            ('while (compile-while tree))
                            ('break (compile-break tree))
+                           ('continue (compile-continue tree))
                            ('return (compile-return tree))
                            ('call (compile-funcall tree))
                            ('or (compile-or tree))
@@ -181,21 +182,28 @@
                         (let ((testexpr (second tree))
                               (bodyexpr (third tree)))
                           ;; correct
-                          (let ((before-while-tag (make-tag))
+                          (let ((before-loop-tag (make-tag))
                                 (after-loop-tag (make-tag)))
                             (push after-loop-tag loop-exit-tags)
-                            (emit-tag before-while-tag)
+                            (push before-loop-tag loop-continue-tags)
+                            (emit-tag before-loop-tag)
                             (compile-expr testexpr)
                             (emit-code 'byte-goto-if-nil-else-pop after-loop-tag)
                             (compile-expr bodyexpr)
-                            (emit-code 'byte-goto before-while-tag)
+                            (emit-code 'byte-goto before-loop-tag)
                             (emit-tag after-loop-tag)
-                            (pop loop-exit-tags))))
+                            (pop loop-exit-tags)
+                            (pop loop-continue-tags))))
          ;; Compile a break (which can only be within a while loop
          (compile-break (tree)
                         (unless loop-exit-tags
                           (throw 'compiler-error "A break stmt without an outer loop"))
                         (emit-code 'byte-goto (first loop-exit-tags)))
+         ;; Compile a continue (which can only be within a while loop
+         (compile-continue (tree)
+                           (unless loop-exit-tags
+                             (throw 'compiler-error "A continue stmt without an outer loop"))
+                           (emit-code 'byte-goto (first loop-continue-tags)))
          ;; Compile a return statement
          (compile-return (tree)
                          (let ((retexpr (second tree)))

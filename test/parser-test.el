@@ -163,7 +163,7 @@
     (should (equal '(break)
                    (parser-parse-flow-stmt))))
   (evaluator-with-tokenized "continue"
-    (should (equal 'continue
+    (should (equal '(continue)
                    (parser-parse-flow-stmt))))
   (evaluator-with-tokenized "return"
     (should (equal '(return nil)

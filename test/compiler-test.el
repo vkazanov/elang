@@ -190,6 +190,19 @@
                    constants))
     (should (equal 1 depth))))
 
+(ert-deftest compiler-test-while-continue-to-lap ()
+  (with-compiled-single "while a: continue"
+    (should (equal '((TAG 1)
+                     (byte-varref . 0)
+                     (byte-goto-if-nil-else-pop . (TAG 2))
+                     (byte-goto . (TAG 1))
+                     (byte-goto . (TAG 1))
+                     (TAG 2))
+                   codes))
+    (should (equal [a]
+                   constants))
+    (should (equal 1 depth))))
+
 (ert-deftest compiler-test-or-to-lap ()
   (with-compiled-single "a or b"
     (should (equal '((byte-varref . 0)

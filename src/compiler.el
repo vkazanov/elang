@@ -27,6 +27,8 @@
         (tag-counter 0)                 ; current tag number
         binds                           ; bound var alist
         globals                         ; global vars alist
+        loop-exit-tags                  ; current loop break target stack
+        loop-continue-tags              ; current loop continue target stack
         (depth 0)                       ; current stack depth
         (maxdepth 0)                    ; max stack depth
         )
@@ -74,6 +76,7 @@
                            ('assign (compile-assign tree))
                            ('progn (compile-progn tree))
                            ('while (compile-while tree))
+                           ('break (compile-break tree))
                            ('return (compile-return tree))
                            ('call (compile-funcall tree))
                            ('or (compile-or tree))
@@ -153,7 +156,9 @@
                                                                byte-varbind
                                                                byte-varset))
                                           (and (listp form)
-                                               (memq (first form) '(global))))
+                                               (memq (first form) '(global
+                                                                    break
+                                                                    continue))))
                                 (emit-code 'byte-discard))))))
          ;; Compile an assignment
          (compile-assign (tree)
@@ -178,12 +183,19 @@
                           ;; correct
                           (let ((before-while-tag (make-tag))
                                 (after-loop-tag (make-tag)))
+                            (push after-loop-tag loop-exit-tags)
                             (emit-tag before-while-tag)
                             (compile-expr testexpr)
                             (emit-code 'byte-goto-if-nil-else-pop after-loop-tag)
                             (compile-expr bodyexpr)
                             (emit-code 'byte-goto before-while-tag)
-                            (emit-tag after-loop-tag))))
+                            (emit-tag after-loop-tag)
+                            (pop loop-exit-tags))))
+         ;; Compile a break (which can only be within a while loop
+         (compile-break (tree)
+                        (unless loop-exit-tags
+                          (throw 'compiler-error "A break stmt without an outer loop"))
+                        (emit-code 'byte-goto (first loop-exit-tags)))
          ;; Compile a return statement
          (compile-return (tree)
                          (let ((retexpr (second tree)))

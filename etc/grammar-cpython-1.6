@@ -15,7 +15,8 @@ simple_stmt: small_stmt (';' small_stmt)* [';'] NEWLINE
 small_stmt: expr_stmt |  flow_stmt | assert_stmt | global_stmt | 'pass'
 expr_stmt: testlist [('=' testlist)]
 # For assignments, additional restrictions enforced by the interpreter
-flow_stmt: 'break' | 'continue' | return_stmt
+flow_stmt: break_stmt | 'continue' | return_stmt
+break_stmt: 'break'
 return_stmt: 'return' [testlist]
 global_stmt: 'global' NAME (',' NAME)*
 assert_stmt: 'assert' test

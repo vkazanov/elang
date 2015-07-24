@@ -146,11 +146,17 @@
   (let* ((current-token (first token-stream))
          (token-value (second current-token)))
     (cond
-     ((token-is-keyword-p '("break" "continue"))
+     ((token-is-keyword-p '("continue"))
       (intern token-value))
+     ((token-is-keyword-p '("break"))
+      (parse-break-stmt))
      ((token-is-keyword-p '("return"))
       (parse-return-stmt))
      (t (throw  'parser-error (format "Unexpected token: %s" (car token-stream)))))))
+
+(defun parse-break-stmt ()
+  (token-pop-or-fail 'KEYWORD '("break"))
+  (list 'break))
 
 (defun parse-return-stmt ()
   (token-pop-or-fail 'KEYWORD '("return"))

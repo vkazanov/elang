@@ -160,7 +160,7 @@
 
 (ert-deftest parser-test-flow-stmt ()
   (evaluator-with-tokenized "break"
-    (should (equal 'break
+    (should (equal '(break)
                    (parser-parse-flow-stmt))))
   (evaluator-with-tokenized "continue"
     (should (equal 'continue
@@ -245,6 +245,18 @@
                       (progn
                         (assign a (call + 1 2))
                         (assign b 3)))
+                   (parser-parse-while)))))
+
+(ert-deftest parser-test-while-break ()
+  (evaluator-with-tokenized "while True: break"
+    (should (equal '(while True
+                      (progn
+                        (break)))
+                   (parser-parse-while))))
+  (evaluator-with-tokenized "while True: \n break\n"
+    (should (equal '(while True
+                      (progn
+                        (break)))
                    (parser-parse-while)))))
 
 (ert-deftest parser-test-if ()

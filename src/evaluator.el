@@ -56,7 +56,7 @@
     (`(defun ,name ,arglist ,body)
      (fset (compiler-name-translate (intern name)) (evaluator-make-function body arglist)))
     (`(assign ,testlist-left ,testlist-right)
-     (set testlist-left testlist-right))
+     (set (compiler-name-translate testlist-left) testlist-right))
     (_
      (throw 'evaluator-error "Unknown toplevel form"))))
 

@@ -118,3 +118,13 @@
                  t))
   (should (equal (compile-and-run "return False")
                  nil)))
+
+(ert-deftest eval-test-strings ()
+  (should (equal (compile-and-run "return\"test\"")
+                 "test"))
+  (should (equal (compile-and-run "return \"\"\"test\"\"\" ")
+                 "test"))
+  (should (equal (compile-and-run "return 'test'")
+                 "test"))
+  (should (equal (compile-and-run "return '''test'''")
+                 "test")))

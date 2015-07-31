@@ -28,8 +28,20 @@
       (string-to-number value))
      ((eq type 'STRING)
       (token-pop)
-      (read value))
+      (parse-string value))
      (t (throw 'parser-error (format "Unexpected token: %s instead of atom" type))))))
+
+(defun parse-string (value)
+  (cond
+   ((string-prefix-p "\"\"\"" value)
+    (substring-no-properties value 3 -3))
+   ((string-prefix-p "\"" value)
+    (substring-no-properties value 1 -1))
+   ((string-prefix-p "'''" value)
+    (substring-no-properties value 3 -3))
+   ((string-prefix-p "'" value)
+    (substring-no-properties value 1 -1))
+   (t (throw 'parser-error (format "Unknown string type: %s" value)))))
 
 (defun parse-power ()
   (let* ((atom (parse-atom))

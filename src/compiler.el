@@ -71,8 +71,9 @@
                         ((symbolp tree)
                          (compile-name tree))
                         ((numberp tree)
-                         (emit-code 'byte-constant (length constants))
-                         (add-constant tree))
+                         (compile-number tree))
+                        ((stringp tree)
+                         (compile-string tree))
                         ((listp tree)
                          (cl-case (first tree)
                            ('if (compile-if tree))
@@ -93,6 +94,14 @@
                        (let ((synonym (assq tree varname-synonyms)))
                          (add-constant (if synonym (cdr synonym)
                                          (name-translate tree)))))
+         ;; Compile a number
+         (compile-number (tree)
+                         (emit-code 'byte-constant (length constants))
+                         (add-constant tree))
+         ;; Compile a string
+         (compile-string (tree)
+                         (emit-code 'byte-constant (length constants))
+                         (add-constant tree))
          ;; Compile a usual function call
          (compile-funcall (tree)
                           (let* ((tree (rest tree))

@@ -15,6 +15,14 @@
           (should (equal (parser-parse-atom)
                          atom)))))
 
+(ert-deftest parser-test-string ()
+  (loop for text in
+        (list  "\"string\"" "'string'" "\"\"\"string\"\"\"" "'''string'''")
+        do
+        (evaluator-with-tokenized text
+          (should (equal (parser-parse-atom)
+                         "string")))))
+
 (ert-deftest parser-test-power ()
   (evaluator-with-tokenized "123"
     (let ((token (first tokens)))

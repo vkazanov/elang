@@ -204,7 +204,7 @@
     (should (equal nil
                    (parser-parse-small-stmt))))
   (evaluator-with-tokenized "continue"
-    (should (equal 'continue
+    (should (equal '(continue)
                    (parser-parse-small-stmt))))
   (evaluator-with-tokenized "a + b"
     (should (equal '(call + a b)

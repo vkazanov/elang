@@ -112,3 +112,9 @@
   (should (equal (testfun "one" "two")
                  "onetwo"))
   (fset 'testfun nil))
+
+(ert-deftest eval-test-constants ()
+  (should (equal (compile-and-run "return True")
+                 t))
+  (should (equal (compile-and-run "return False")
+                 nil)))

@@ -8,9 +8,12 @@
 
 (define-namespace compiler-
 
-(defconst synonyms '((== . compiler-synonym-==)
-                     (!= . compiler-synonym-!=)
-                     (** . compiler-synonym-**)))
+(defconst varname-synonyms '((True . t)
+                             (False . nil)))
+
+(defconst funcall-synonyms '((== . compiler-synonym-==)
+                             (!= . compiler-synonym-!=)
+                             (** . compiler-synonym-**)))
 
 (defun synonym-== (left right)
   (equal left right))
@@ -20,6 +23,16 @@
 
 (defun synonym-** (left right)
   (expt left right))
+
+(defun name-translate (symbol)
+  "Translate a Python-style symbol name into an elisp one"
+  (let ((sname (symbol-name symbol)))
+    (with-temp-buffer
+      (insert sname)
+      (goto-char (point-min))
+      (while (search-forward "_" nil t)
+        (replace-match "-" nil t))
+      (intern (buffer-string)))))
 
 (defun compile-to-lapcode (parse-tree &optional file-input)
   (let (codes                           ; codes emitted
@@ -52,21 +65,11 @@
          (unbind-all ()
                      (when binds
                        (emit-code 'byte-unbind (length binds))))
-         ;; translate a Python-style name into an elisp one
-         (name-translate (symbol)
-                         (let ((sname (symbol-name symbol)))
-                           (with-temp-buffer
-                             (insert sname)
-                             (goto-char (point-min))
-                             (while (search-forward "_" nil t)
-                               (replace-match "-" nil t))
-                             (intern (buffer-string)))))
          ;; Compile an expression (main compilation entry point)
          (compile-expr (tree)
                        (cond
                         ((symbolp tree)
-                         (emit-code 'byte-varref (length constants))
-                         (add-constant (name-translate tree)))
+                         (compile-name tree))
                         ((numberp tree)
                          (emit-code 'byte-constant (length constants))
                          (add-constant tree))
@@ -84,12 +87,18 @@
                            ('and (compile-and tree))
                            ('global (compile-global tree))))
                         (t (error "Cannot compile") )))
+         ;; Compile variable names
+         (compile-name (tree)
+                       (emit-code 'byte-varref (length constants))
+                       (let ((synonym (assq tree varname-synonyms)))
+                         (add-constant (if synonym (cdr synonym)
+                                         (name-translate tree)))))
          ;; Compile a usual function call
          (compile-funcall (tree)
                           (let* ((tree (rest tree))
                                  (sym (first tree))
                                  (args (rest tree))
-                                 (synonym (assq sym synonyms)))
+                                 (synonym (assq sym funcall-synonyms)))
                             (emit-code 'byte-constant (length constants))
                             (add-constant (if synonym (cdr synonym)
                                             (name-translate sym)))

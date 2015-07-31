@@ -23,7 +23,7 @@ def test5():
 			break
 		break
 
-# a simple while loop (using a continue)
+# a simple while loop using a continue
 def test6():
 	a = 1
 	while 10:

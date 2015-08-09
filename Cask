@@ -3,8 +3,7 @@
 
 (package "emacs-lang" "0.0.1" "A simple Python-like language for the Emacs VM")
 
-(files ("src/*.el"
-        (:exclude ".gitignore" "*-test.el" ".projectile")))
+(files "*.el")
 
 (depends-on "names")
 (development

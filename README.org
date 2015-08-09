@@ -1,1 +1,36 @@
 A simple Python-like language for the Emacs VM
+
+* What is Elang?
+
+  Elang is a Frankenstein's monster, created using a ported Python tokenizer, a
+  Python subset parser and a compiler which emits Emacs VM byte-code.
+
+* Who needs such a beast?
+
+  A good question. Practically? Nobody. I really think Emacs Lisp is totally
+  fine for Emacs (apart from the little annoyances we all just learn to love).
+  This is something I created just to see if Emacs VM can be a target for a
+  language different from Lisps.
+
+* How does it work?
+
+  What do you think? It tokenizes the code, parses it, then compiles to a
+  byte-compiled Emacs function and executes the latter.
+
+  To load a complete file it just parses the complete file, finding ~def~'s and
+  global assignments, loading the functions and setting global variables.
+
+  Note that global assignments currently do not evaluate it's values.
+
+* How to play with it?
+
+  Check out the repository, add the resulting directory to your load-path and do
+  src_emacs-lisp{(require 'elang)}.
+
+  Then open one of the example files in the ~examples/~ directory and do, say
+  (src_emacs-lisp{(elang-eval-current-defun)}).
+
+* Gotchas
+
+  This is not Python. This is not even a port of the language. Technically this
+  is Emacs Lisp using basic Python syntax ideas.

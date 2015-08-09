@@ -7,15 +7,16 @@ A simple Python-like language for the Emacs VM
 
 * Who needs such a beast?
 
-  A good question. Practically? Nobody. I really think Emacs Lisp is totally
-  fine for Emacs (apart from the little annoyances we all just learn to love).
+  Good question. Practically? Nobody. I really think Emacs Lisp is totally fine
+  for Emacs (apart from the little annoyances we've all just learned to love).
   This is something I created just to see if Emacs VM can be a target for a
   language different from Lisps.
 
 * How does it work?
 
-  What do you think? It tokenizes the code, parses it, then compiles to a
-  byte-compiled Emacs function and executes the latter.
+  What do you think? It tokenizes the code, parses the token stream, then
+  compiles the parse tree to a byte-compiled Emacs function and executes the
+  latter.
 
   To load a complete file it just parses the complete file, finding ~def~'s and
   global assignments, loading the functions and setting global variables.
@@ -24,11 +25,11 @@ A simple Python-like language for the Emacs VM
 
 * How to play with it?
 
-  Check out the repository, add the resulting directory to your load-path and do
-  src_emacs-lisp{(require 'elang)}.
+  Check out the repository, add the resulting directory to your ~load-path~ and do
+  ~(require 'elang)~.
 
   Then open one of the example files in the ~examples/~ directory and do, say
-  (src_emacs-lisp{(elang-eval-current-defun)}).
+  ~(elang-eval-current-defun)~.
 
 * Gotchas
 

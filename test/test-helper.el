@@ -2,10 +2,10 @@
 ;;
 ;;; Test utility macros and functions
 
-(require 'tokenizer)
-(require 'parser)
-(require 'compiler)
-(require 'evaluator)
+(require 'elang-tokenizer)
+(require 'elang-parser)
+(require 'elang-compiler)
+(require 'elang)
 
 (defmacro with-compiled-single (str &rest body)
   (declare (indent 1))

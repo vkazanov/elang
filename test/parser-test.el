@@ -1,9 +1,6 @@
 ;; -*- lexical-binding: t -*-
 ;;
-;;; Tests for parser.el.
-
-(require 'parser)
-(require 'tokenizer)
+;;; Tests for elang-parser.el.
 
 (ert-deftest parser-test-atom ()
   (loop for text in

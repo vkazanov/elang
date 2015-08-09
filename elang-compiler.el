@@ -4,8 +4,6 @@
 
 (eval-when-compile (require 'names))
 
-(require 'parser)
-
 (define-namespace compiler-
 
 (defconst varname-synonyms '((True . t)
@@ -255,4 +253,4 @@
 
 ) ;;; end of compiler- namespace
 
-(provide 'compiler)
+(provide 'elang-compiler)

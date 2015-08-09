@@ -4,9 +4,9 @@
 
 (eval-when-compile (require 'names))
 
-(require 'tokenizer)
-(require 'parser)
-(require 'compiler)
+(require 'elang-tokenizer)
+(require 'elang-parser)
+(require 'elang-compiler)
 (require 'python)
 
 (define-namespace evaluator-
@@ -70,4 +70,4 @@
 
 )   ;;; end of evaluator- namespace
 
-(provide 'evaluator)
+(provide 'elang)

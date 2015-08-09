@@ -2,11 +2,6 @@
 ;;
 ;;; Tests for compiled lapcode evaluation
 
-
-(require 'compiler)
-(require 'parser)
-(require 'tokenizer)
-
 (ert-deftest eval-test-expr ()
   (should (equal (compile-and-run "return")
                  nil))

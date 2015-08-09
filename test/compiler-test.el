@@ -1,10 +1,6 @@
 ;; -*- lexical-binding: t -*-
 ;;
-;;; Tests for compiler.el
-
-(require 'compiler)
-(require 'parser)
-(require 'tokenizer)
+;;; Tests for elang-compiler.el
 
 (ert-deftest compiler-test-compile-funcall-synonym ()
   (with-compiled-single "1 == 2"

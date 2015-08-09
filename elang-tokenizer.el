@@ -461,4 +461,4 @@ string with no properties, nil if EOF is reached"
 
 ) ;; tokenizer- namespace end
 
-(provide 'tokenizer)
+(provide 'elang-tokenizer)

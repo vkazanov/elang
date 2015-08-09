@@ -390,4 +390,4 @@
 
 ) ;; end parser- namespace
 
-(provide 'parser)
+(provide 'elang-parser)

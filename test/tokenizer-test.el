@@ -1,10 +1,9 @@
 ;; -*- lexical-binding: t -*-
 ;;
-;;; Tests for tokenizer.el.
+;;; Tests for elang-tokenizer.el.
 ;;
 ;; NOTE: tests are incomplete
 
-(require 'tokenizer)
 (require 'cl)
 
 (defconst tokenizer-test-operator-str-list

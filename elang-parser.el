@@ -4,7 +4,7 @@
 
 (eval-when-compile (require 'names))
 
-(define-namespace parser-
+(define-namespace elang-
 
 (defvar token-stream
   nil)
@@ -388,6 +388,6 @@
 
 (defalias 'dbind 'destructuring-bind)
 
-) ;; end parser- namespace
+) ;; end elang- namespace
 
 (provide 'elang-parser)

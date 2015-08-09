@@ -9,7 +9,7 @@
                      (byte-constant . 2)
                      (byte-call . 2))
                    codes))
-    (should (equal [compiler-synonym-== 1 2]
+    (should (equal [elang-synonym-== 1 2]
                    constants))
     (should (equal 3 depth)))
   (with-compiled-single "1 != 2"
@@ -18,7 +18,7 @@
                      (byte-constant . 2)
                      (byte-call . 2))
                    codes))
-    (should (equal [compiler-synonym-!= 1 2]
+    (should (equal [elang-synonym-!= 1 2]
                    constants))
     (should (equal 3 depth))))
 

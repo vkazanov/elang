@@ -4,14 +4,14 @@
 
 (eval-when-compile (require 'names))
 
-(define-namespace compiler-
+(define-namespace elang-
 
 (defconst varname-synonyms '((True . t)
                              (False . nil)))
 
-(defconst funcall-synonyms '((== . compiler-synonym-==)
-                             (!= . compiler-synonym-!=)
-                             (** . compiler-synonym-**)))
+(defconst funcall-synonyms '((== . elang-synonym-==)
+                             (!= . elang-synonym-!=)
+                             (** . elang-synonym-**)))
 
 (defun synonym-== (left right)
   (equal left right))
@@ -251,6 +251,6 @@
       (values (reverse codes) (vconcat (reverse constants)) maxdepth))))
 
 
-) ;;; end of compiler- namespace
+) ;;; end of elang-compiler- namespace
 
 (provide 'elang-compiler)

@@ -10,23 +10,23 @@
 (defmacro with-compiled-single (str &rest body)
   (declare (indent 1))
   `(let (parse-tree)
-     (evaluator-with-tokenized ,str
-       (setq parse-tree (parser-parse-single-input)))
-     (dbind (codes constants depth) (compiler-compile-to-lapcode parse-tree)
+     (elang-with-tokenized ,str
+       (setq parse-tree (elang-parse-single-input)))
+     (dbind (codes constants depth) (elang-compile-to-lapcode parse-tree)
        ,@body)))
 
 (defmacro with-compiled-file (str &rest body)
   (declare (indent 1))
   `(let (parse-tree)
-     (evaluator-with-tokenized ,str
-       (setq parse-tree (parser-parse-file-input)))
-     (dbind (codes constants depth) (compiler-compile-to-lapcode parse-tree t)
+     (elang-with-tokenized ,str
+       (setq parse-tree (elang-parse-file-input)))
+     (dbind (codes constants depth) (elang-compile-to-lapcode parse-tree t)
        ,@body)))
 
 (defun compile-to-function (bodystr arglist)
-  (evaluator-with-tokenized bodystr
-    (let ((parse-tree (parser-parse-file-input)))
-      (dbind (lapcode constants depth) (compiler-compile-to-lapcode parse-tree)
+  (elang-with-tokenized bodystr
+    (let ((parse-tree (elang-parse-file-input)))
+      (dbind (lapcode constants depth) (elang-compile-to-lapcode parse-tree)
         (make-byte-code
          arglist
          (byte-compile-lapcode lapcode)

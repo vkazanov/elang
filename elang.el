@@ -9,7 +9,7 @@
 (require 'elang-compiler)
 (require 'python)
 
-(define-namespace evaluator-
+(define-namespace elang-
 
 (defun eval-current-defun ()
   (interactive)
@@ -41,33 +41,33 @@
   `(with-temp-buffer
      (insert ,str)
      (let* ((tokens (reverse (tokenizer-tokenize-region))))
-       (setq-local parser-token-stream tokens)
+       (setq-local elang-token-stream tokens)
        ,@body)))
 
 (defmacro with-parsed (str &rest body)
   (declare (indent 1))
   `(let (parse-tree)
-     (evaluator-with-tokenized ,str
-       (setq parse-tree (parser-parse-file-input)))
+     (elang-with-tokenized ,str
+       (setq parse-tree (elang-parse-file-input)))
      ,@body))
 
 (defun eval-toplevel (form)
   (pcase form
     (`(defun ,name ,arglist ,body)
-     (fset (compiler-name-translate (intern name)) (evaluator-make-function body arglist)))
+     (fset (elang-name-translate (intern name)) (evaluator-make-function body arglist)))
     (`(assign ,testlist-left ,testlist-right)
-     (set (compiler-name-translate testlist-left) testlist-right))
+     (set (elang-name-translate testlist-left) testlist-right))
     (_
      (throw 'evaluator-error "Unknown toplevel form"))))
 
 (defun make-function (parse-tree arglist)
-  (destructuring-bind (lapcode constants depth) (compiler-compile-to-lapcode parse-tree t)
+  (destructuring-bind (lapcode constants depth) (elang-compile-to-lapcode parse-tree t)
     (make-byte-code
      arglist
      (byte-compile-lapcode lapcode)
      constants
      depth)))
 
-)   ;;; end of evaluator- namespace
+)   ;;; end of elang- namespace
 
 (provide 'elang)

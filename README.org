@@ -18,7 +18,7 @@ A simple Python-like language for the Emacs VM
   compiles the parse tree to a byte-compiled Emacs function and executes the
   latter.
 
-  To load a complete file it just parses the complete file, finding ~def~'s and
+  To load a complete file it just parses the file, finding ~def~'s and
   global assignments, loading the functions and setting global variables.
 
   Note that global assignments currently do not evaluate it's values.

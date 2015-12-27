@@ -1,13 +1,27 @@
-* Not yet implemented
+* Critical
+
+   - top-level code evaluation (as an anonymous function)
 
    - the for loop
 
-   - optional function args
-
    - is vs == vs =
+
+   - text on is vs == vs =
+
+   - text dynamic binding and lexical binding in Elang
+
+   - text on proper examples (strings, expressions, globals, while, if/elif/else)
+
+* Secondary
+
+   - docstrings
+
+   - interactive emacs function
+
+   - optional function args
 
    - list syntax
 
-   - file loading mechanics (expression evaluation, etc)
-
    - multiple value assignments, mutiple value return, etc
+
+   - remove to-plain-list-if-single in testlist

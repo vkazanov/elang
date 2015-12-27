@@ -31,3 +31,16 @@ def test6():
 		if a < 10: continue
 		break
 	return a
+
+# if/elif/else
+def test7(a):
+    if a < 5:
+        return -1
+    elif a == 5:
+        return 0
+    else:
+        return 1
+
+# two string syntaxes
+def test8():
+    return concat("double" ,'single')

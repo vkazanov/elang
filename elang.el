@@ -34,7 +34,7 @@
   (let ((regionstr (buffer-substring-no-properties min max)))
     (with-parsed regionstr
                  (dolist (form (rest parse-tree))
-                   (evaluator-eval-toplevel form)))))
+                   (elang-eval-toplevel form)))))
 
 (defmacro with-tokenized (str &rest body)
   (declare (indent 1))
@@ -54,7 +54,7 @@
 (defun eval-toplevel (form)
   (pcase form
     (`(defun ,name ,arglist ,body)
-     (fset (elang-name-translate (intern name)) (evaluator-make-function body arglist)))
+     (fset (elang-name-translate (intern name)) (elang-amake-function body arglist)))
     (`(assign ,testlist-left ,testlist-right)
      (set (elang-name-translate testlist-left) testlist-right))
     (_

@@ -51,4 +51,4 @@ funcalls. Things to remember additionally:
 
   4. No list or map-related syntax.
 
-It's unusable. See the ~examples/~ for working, well, examples.
+Check the ~examples/~ directory for code that should work now.

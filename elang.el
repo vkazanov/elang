@@ -54,7 +54,7 @@
 (defun eval-toplevel (form)
   (pcase form
     (`(defun ,name ,arglist ,body)
-     (fset (elang-name-translate (intern name)) (elang-amake-function body arglist)))
+     (fset (elang-name-translate (intern name)) (elang-make-function body arglist)))
     (`(assign ,testlist-left ,testlist-right)
      (set (elang-name-translate testlist-left) testlist-right))
     (_

@@ -32,7 +32,9 @@ A simple Python-like language for the Emacs VM
 
   Then open one of the example files in the ~examples/~ directory and do, say,
   ~(elang-eval-current-defun)~ while having the point somewhere within one of
-  the test functions there.
+  the test functions there. 
+  
+  The function should become available through ~M-:~ or any other means of running Emacs Lisp functions. 
 
 * Gotchas
 

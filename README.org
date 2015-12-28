@@ -25,13 +25,28 @@ A simple Python-like language for the Emacs VM
 
 * How to play with it?
 
-  Check out the repository, add the resulting directory to your ~load-path~ and do
+  Install the ~names~ package.
+
+  Clone the repository, add the resulting directory to your ~load-path~ and do
   ~(require 'elang)~.
 
-  Then open one of the example files in the ~examples/~ directory and do, say
-  ~(elang-eval-current-defun)~.
+  Then open one of the example files in the ~examples/~ directory and do, say,
+  ~(elang-eval-current-defun)~ while having the point somewhere within one of
+  the test functions there.
 
 * Gotchas
 
-  This is not Python. This is not even a port of the language. Technically this
-  is Emacs Lisp using basic Python syntax ideas.
+Actually, only the most basic things currently work, i.e. expressions and
+funcalls. Things to remember additionally:
+
+  1. This is not Python. This is not even a port of the language. Technically this
+     is Emacs Lisp using basic Python syntax ideas.
+
+  2. The language uses dynamic binding.
+
+  3. The language does not interoperate with Emacs Lisp in a nice way, i.e.
+     there's no was to deal with symbols, or declare an interactive function.
+
+  4. No list or map-related syntax.
+
+It's unusable. See the ~examples/~ for working, well, examples.

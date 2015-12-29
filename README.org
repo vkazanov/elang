@@ -1,4 +1,4 @@
-https://api.travis-ci.org/vkazanov/elang.svg
+[[https://api.travis-ci.org/vkazanov/elang.svg][file:https://api.travis-ci.org/vkazanov/elang.svg]]
 
 A simple Python-like language for the Emacs VM
 

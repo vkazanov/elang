@@ -1,11 +1,11 @@
+https://api.travis-ci.org/vkazanov/elang.svg
+
 A simple Python-like language for the Emacs VM
 
 * What is Elang?
 
   Elang is a Frankenstein's monster, created using a ported Python tokenizer, a
   Python subset parser and a compiler which emits Emacs VM byte-code.
-
-
 
 * Who needs such a beast?
 

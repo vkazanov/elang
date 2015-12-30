@@ -2,7 +2,7 @@
 ;;
 ;; A simple RD parser for a small Python subset.
 
-(eval-when-compile (require 'names))
+(require 'names)
 
 (define-namespace elang-
 

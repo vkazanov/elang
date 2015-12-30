@@ -2,7 +2,7 @@
 ;;
 ;;; IR to lapcode compiler
 
-(eval-when-compile (require 'names))
+(require 'names)
 
 (define-namespace elang-
 

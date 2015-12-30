@@ -3,10 +3,10 @@
 ;; In short, this is a straightforward port of CPython's Lib/tokenize.py. See
 ;; the original code for comments.
 
-(eval-when-compile (require 'names))
+(require 'names)
 (require 'cl)
 
-(define-namespace tokenizer-
+(define-namespace elang-
 
 ;;; Tokenizer entry point
 ;;; ---------------------
@@ -447,18 +447,17 @@ string with no properties, nil if EOF is reached"
 >= GREATEREQUAL
 ** DOUBLESTAR
 ")
-(defconst opmap nil)
-(eval-when (eval)
-  (setq opmap (make-hash-table :test 'equal))
-  (loop for pair-str
-        in (split-string opmap-raw "[\\\n]" t) do
+(defconst opmap
+  (eval-when-compile
+    (let ((map (make-hash-table :test 'equal)))
+      (dolist (pair-str (split-string opmap-raw "[\\\n]" t) map)
         (let* ((pair (split-string pair-str))
                (op (car pair))
                (token-name (cadr pair))
                ;; should be defined in token.el already
                (token-value (intern token-name)))
-          (puthash op token-value opmap))))
+          (puthash op token-value map))))))
 
-) ;; tokenizer- namespace end
+) ;; elang- namespace end
 
 (provide 'elang-tokenizer)

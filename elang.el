@@ -2,15 +2,17 @@
 ;;
 ;;; Language evaluation and loading
 
-(eval-when-compile (require 'names))
+(require 'names)
 
 (require 'elang-tokenizer)
 (require 'elang-parser)
 (require 'elang-compiler)
 (require 'python)
 
+;;;###autoload
 (define-namespace elang-
 
+:autoload
 (defun eval-current-defun ()
   (interactive)
   (save-excursion
@@ -25,10 +27,13 @@
       (setq max (point))
       (eval-region min max))))
 
+
+:autoload
 (defun eval-buffer ()
   (interactive)
   (eval-region (point-min) (point-max)))
 
+:autoload
 (defun eval-region (min max)
   (interactive "r")
   (let ((regionstr (buffer-substring-no-properties min max)))
@@ -40,7 +45,7 @@
   (declare (indent 1))
   `(with-temp-buffer
      (insert ,str)
-     (let* ((tokens (reverse (tokenizer-tokenize-region))))
+     (let* ((tokens (reverse (elang-tokenize-region))))
        (setq-local elang-token-stream tokens)
        ,@body)))
 

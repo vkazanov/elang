@@ -27,8 +27,6 @@
 
 
 
-(provide 'elang-compiler)
-
 (require 'names)
 
 (define-namespace elang-

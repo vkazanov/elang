@@ -27,9 +27,6 @@
 
 
 
-(provide 'elang-parser)
-
-
 (require 'names)
 
 (define-namespace elang-

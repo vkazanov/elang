@@ -39,6 +39,11 @@
 
 :autoload
 (defun eval-current-defun ()
+  "Evaluate current function.
+
+Locate a function the point is currently within and evaluate the
+region between the start and the end of the definition. The
+function is a convieniece wrapper around `elang-eval-region'."
   (interactive)
   (save-excursion
     (let (min max defunstr)
@@ -55,14 +60,19 @@
 
 :autoload
 (defun eval-buffer ()
+  "Evaluate current buffer.
+
+Evaluate everything between `point-min' and `point-max'. The
+function is a convieniece wrapper around `elang-eval-region'."
   (interactive)
   (eval-region (point-min) (point-max)))
 
-
-(provide 'elang)
-
 :autoload
 (defun eval-region (min max)
+  "Evaluate current region.
+
+Argument MIN is the beginning of the region specified. Argument
+MAX is the end of the region specified."
   (interactive "r")
   (let ((regionstr (buffer-substring-no-properties min max)))
     (with-parsed regionstr

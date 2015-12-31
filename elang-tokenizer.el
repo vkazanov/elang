@@ -27,8 +27,6 @@
 
 
 
-(provide 'elang-tokenizer)
-
 (require 'names)
 (require 'cl)
 

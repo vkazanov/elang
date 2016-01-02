@@ -1,27 +1,39 @@
 * Critical
 
-   - top-level code evaluation (as an anonymous function)
+  Important features missing:
 
-   - the for loop
+   1. The for loop.
 
-   - is vs == vs =
+      Both very important and missing.
 
-   - text on is vs == vs =
+   2. Top-level code evaluation.
 
-   - text dynamic binding and lexical binding in Elang
+      Upon buffer evaluation currently only simple top-level assignment values
+      are set. Proper expressions should work too!
 
-   - text on proper examples (strings, expressions, globals, while, if/elif/else)
+   3. is vs == vs =
+
+      How to map eq/equal/eql should be mapped into the language?
+
+   4. Interactive emacs functions.
+
+      Although probably not fully doable within the syntax, there should at
+      least be a way to declare such a function.
+
+   5. Lisp symbols.
+
+      Symbols are really important for Lisp interop.
 
 * Secondary
 
-   - docstrings
+  Features that would help a lot:
 
-   - interactive emacs function
+   1. Docstrings.
 
-   - optional function args
+   2. Optional function args.
 
-   - list syntax
+   3. Special list/hash syntax.
 
-   - multiple value assignments, mutiple value return, etc
+   4. Multiple value assignments, mutiple value return, etc.
 
-   - remove to-plain-list-if-single in testlist
+   5. Remove to-plain-list-if-single in testlist.

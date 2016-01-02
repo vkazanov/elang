@@ -1,31 +1,12 @@
 [[https://api.travis-ci.org/vkazanov/elang.svg][file:https://api.travis-ci.org/vkazanov/elang.svg]]
 
-A simple Python-like language for the Emacs VM
 
 * What is Elang?
 
-  Elang is a Frankenstein's monster, created using a ported Python tokenizer, a
+  Elang is a a Python-like language for the Emacs VM.
+
+  It is a Frankenstein's monster, created using a ported Python tokenizer, a
   Python subset parser and a compiler which emits Emacs VM byte-code.
-
-* Who needs such a beast?
-
-  Good question. Practically? Nobody. I really think Emacs Lisp is totally fine
-  for Emacs (apart from the little annoyances we've all just learned to love).
-  This is something I created just to see if Emacs VM can be a target for a
-  language different from Lisps.
-
-  And it turns out it can..!
-
-* How does it work?
-
-  What do you think? It tokenizes the code, parses the token stream, then
-  compiles the parse tree to a byte-compiled Emacs function and executes the
-  latter.
-
-  To load a complete file it just parses the file, finding ~def~'s and
-  global assignments, loading the functions and setting global variables.
-
-  Note that global assignments currently do not evaluate it's values.
 
 * How to play with it?
 
@@ -39,6 +20,29 @@ A simple Python-like language for the Emacs VM
   the test functions there.
 
   The function should become available through ~M-:~ or any other means of running Emacs Lisp functions.
+
+  Check the ~examples/~ directory for code that should work now.
+
+* How does it work?
+
+  What do you think? It tokenizes (see ~elang-tokenizer.el~) the code, parses
+  (~elang-parser.el~) the token stream, then compiles (~elang-compiler.el~) the
+  parse tree to a byte-compiled Emacs function and executes the latter.
+
+  To load a complete file it just parses the file, finding ~def~'s and
+  global assignments, loading the functions and setting global variables.
+
+  Note that global assignments currently do not evaluate it's values.
+
+* Who needs such a beast?
+
+  In it's current state - nobody, as there's just too much to do for me. This is
+  something I created just to see if Emacs VM can be a target for a language
+  different from Lisps. And it turns out it can..! I believe this prototype can
+  be turned into something quite useful, or interesting at least.
+
+  So see [[file:TODO]] for a list of things currently missing, and don't hesitate to
+  ask questions or offer code improvements!
 
 * Gotchas
 
@@ -54,5 +58,3 @@ funcalls. Things to remember additionally:
      there's no was to deal with symbols, or declare an interactive function.
 
   4. No list or map-related syntax.
-
-Check the ~examples/~ directory for code that should work now.

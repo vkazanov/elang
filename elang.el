@@ -5,6 +5,7 @@
 ;; Author: Vladimir Kazanov <vkazanov@inbox.ru>
 ;; Keywords: languages
 ;; URL: https://github.com/vkazanov/elang
+;; Version: 0.0.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,7 +22,9 @@
 
 ;;; Commentary:
 
-;;
+;; Elang is a Python-like language for the Emacs VM. The package provides basic
+;; tools that help to work with the language. Functions `elang-eval-current-defun',
+;; `elang-eval-buffer', `elang-eval-region' are the main entry points.
 
 ;;; Code:
 

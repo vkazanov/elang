@@ -1,5 +1,5 @@
 [[https://api.travis-ci.org/vkazanov/elang.svg][file:https://api.travis-ci.org/vkazanov/elang.svg]]
-
+[[http://melpa.org/#/elang][file:http://melpa.org/packages/elang-badge.svg]]
 
 * What is Elang?
 

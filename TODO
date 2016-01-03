@@ -6,14 +6,14 @@
 
       Both very important and missing.
 
-   2. Top-level code evaluation.
+   2. is vs == vs =
+
+      How to map eq/equal/eql should be mapped into the language?
+
+   3. Top-level code evaluation.
 
       Upon buffer evaluation currently only simple top-level assignment values
       are set. Proper expressions should work too!
-
-   3. is vs == vs =
-
-      How to map eq/equal/eql should be mapped into the language?
 
    4. Interactive emacs functions.
 
@@ -32,8 +32,10 @@
 
    2. Optional function args.
 
-   3. Special list/hash syntax.
+   3. List syntax
 
-   4. Multiple value assignments, mutiple value return, etc.
+   4. Hash syntax.
 
-   5. Remove to-plain-list-if-single in testlist.
+   5. Multiple value assignments, mutiple value return, etc.
+
+   6. Remove to-plain-list-if-single in testlist.

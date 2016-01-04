@@ -23,6 +23,9 @@
 
   Check the ~examples/~ directory for code that should work now.
 
+  Alternatively, Elang is also available on MELPA (see the ~elang~ package),
+  although I still recommend doing it manually.
+
 * How does it work?
 
   What do you think? It tokenizes (see ~elang-tokenizer.el~) the code, parses
@@ -41,7 +44,7 @@
   different from Lisps. And it turns out it can..! I believe this prototype can
   be turned into something quite useful, or interesting at least.
 
-  So see [[file:TODO]] for a list of things currently missing, and don't hesitate to
+  So see [[file:TODO.org]] for a list of things currently missing, and don't hesitate to
   ask questions or offer code improvements!
 
 * Gotchas

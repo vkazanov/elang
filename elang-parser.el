@@ -274,6 +274,17 @@
     (token-pop-or-fail 'COLON)
     (list 'while test (parse-suite))))
 
+(defun parse-for ()
+  (token-pop-or-fail 'KEYWORD '("for"))
+  (let ((varname (second (token-pop-or-fail 'NAME)))
+        testlist
+        suite)
+    (token-pop-or-fail 'KEYWORD '("in"))
+    (setq testlist (parse-testlist))
+    (token-pop-or-fail 'COLON)
+    (setq suite (parse-suite))
+    (list 'for varname testlist suite)))
+
 (defun parse-if ()
   (token-pop-or-fail 'KEYWORD '("if"))
   (let ((iftest (parse-test))
@@ -327,7 +338,7 @@
     (setq body (parse-suite))
     (list 'defun name params body)))
 
-(defconst compound-stmt-val-firstset '("while" "def" "if"))
+(defconst compound-stmt-val-firstset '("while" "def" "if" "for"))
 (defun parse-compound-stmt ()
   (cond
    ((token-is-keyword-p '("while"))
@@ -336,11 +347,13 @@
     (parse-funcdef))
    ((token-is-keyword-p '("if"))
     (parse-if))
+   ((token-is-keyword-p '("for"))
+    (parse-for))
    (t (throw 'parser-error (format "Unexpected token: %s" (car (car token-stream)))))))
 
 (defconst stmt-type-firstset '(NAME STRING NUMBER MINUS LPAR PLUS))
 (defconst stmt-val-firstset
-  '("return" "assert" "global" "if" "not" "pass" "def" "break" "continue" "while"))
+  '("return" "assert" "global" "if" "not" "pass" "def" "break" "continue" "while" "for"))
 (defun parse-stmt ()
   (cond
    ((token-is-keyword-p compound-stmt-val-firstset)

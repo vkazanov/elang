@@ -252,6 +252,11 @@
                         (assign b 3)))
                    (elang-parse-while)))))
 
+(ert-deftest parser-test-for ()
+  (elang-with-tokenized "for a in things: 1"
+    (should (equal '(for "a" (things) (progn 1))
+                   (elang-parse-for)))))
+
 (ert-deftest parser-test-while-break ()
   (elang-with-tokenized "while True: break"
     (should (equal '(while True
@@ -320,6 +325,12 @@
                    (elang-parse-compound-stmt))))
   (elang-with-tokenized "if True: pass"
     (should (equal '(if True (progn nil) nil)
+                   (elang-parse-compound-stmt))))
+  (elang-with-tokenized "if True: pass"
+    (should (equal '(if True (progn nil) nil)
+                   (elang-parse-compound-stmt))))
+  (elang-with-tokenized "for a in things: 1"
+    (should (equal '(for "a" (things) (progn 1))
                    (elang-parse-compound-stmt)))))
 
 (ert-deftest parser-test-stmt ()

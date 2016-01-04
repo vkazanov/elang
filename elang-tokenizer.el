@@ -179,7 +179,7 @@ string beginning only. Return the match or nil."
 (defconst tabsize 8)
 
 (defconst keyword-names
-  '("return" "assert" "global" "if" "elif" "else" "not" "pass" "def" "break" "continue" "while" "or" "and"))
+  '("return" "assert" "global" "if" "elif" "else" "not" "pass" "def" "break" "continue" "while" "for" "in" "or" "and"))
 
 ;; Main starting point
 (defun generate-tokens (yield)
